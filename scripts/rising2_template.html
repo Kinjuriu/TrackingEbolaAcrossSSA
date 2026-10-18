@@ -1,0 +1,412 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Ebola Rising</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Sacramento&display=swap">
+<style>
+/* Layout: a cinematic 3D spike map on real satellite relief fills the hero and plays like a film;
+   field-guide annotations (clean sans + monoline handwriting, dotted leaders) label the story;
+   a locator map keeps the viewer oriented. Committed dark look. */
+:root{
+  --bg:#050808; --line:rgba(235,240,232,.10);
+  --fg:#eef1ec; --muted:#a3ada5; --faint:#6a756d;
+  --amber:#f3a83b; --amber-hi:#ffd27a; --red:#ec6a50; --chalk:#f3efe4;
+  --sans:"Fira Sans","Helvetica Neue",Arial,sans-serif;
+  --hand:"Sacramento","Segoe Script","Brush Script MT",cursive;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+.page{max-width:1180px;margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:18px 44px}
+.kicker{font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin:0 0 4px}
+h1{font-weight:500;font-size:clamp(26px,4.4vw,44px);line-height:1.06;margin:0 0 6px;text-wrap:balance;letter-spacing:-.005em}
+.dek{font-weight:300;font-size:clamp(15px,2vw,18px);color:#cfd6ce;max-width:64ch;margin:0 0 16px;line-height:1.5}
+.dek .hand{font-family:var(--hand);font-size:1.6em;color:var(--chalk);line-height:1}
+
+.stage{position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#050808;border:1px solid var(--line);user-select:none}
+@media (max-width:680px){.stage{aspect-ratio:4/5}}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 95% at 55% 45%,rgba(0,0,0,0) 50%,rgba(0,0,0,.58) 100%)}
+.ov{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+
+.readout{position:absolute;top:clamp(14px,3vw,30px);left:clamp(14px,3vw,34px);pointer-events:none;max-width:62%}
+.r-date{font-size:clamp(13px,1.8vw,21px);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#f6f7f3;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.r-cases{font-size:clamp(18px,3vw,36px);font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--amber);font-variant-numeric:tabular-nums;margin-top:1px;text-shadow:0 1px 10px rgba(0,0,0,.8)}
+.r-deaths{font-size:clamp(11px,1.4vw,15px);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--red);font-variant-numeric:tabular-nums;margin-top:3px;text-shadow:0 1px 8px rgba(0,0,0,.85)}
+.r-place{font-size:clamp(11px,1.35vw,15px);font-weight:300;color:#e3e8e2;margin-top:8px;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+.r-hand{font-family:var(--hand);font-size:clamp(18px,2.6vw,31px);color:var(--chalk);line-height:1.05;margin-top:2px;text-shadow:0 1px 10px rgba(0,0,0,.9)}
+
+.titlecard{position:absolute;left:clamp(14px,3vw,34px);bottom:clamp(18px,4.5vw,46px);pointer-events:none;max-width:min(620px,82%)}
+.titlecard .tk{font-size:clamp(11px,1.2vw,13px);font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:#e9ece6}
+.titlecard .tt{font-weight:500;font-size:clamp(28px,5vw,60px);line-height:1;color:#fff;margin:6px 0 2px;text-shadow:0 2px 18px rgba(0,0,0,.8)}
+.titlecard .tb{font-family:var(--hand);font-size:clamp(24px,3.6vw,44px);color:var(--chalk);text-shadow:0 2px 14px rgba(0,0,0,.85)}
+
+.clab{position:absolute;transform:translate(-50%,-50%);font-size:clamp(9px,1.2vw,14px);font-weight:400;letter-spacing:.24em;color:rgba(232,236,228,.5);text-align:center;line-height:1.25;white-space:nowrap;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.plab{position:absolute;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;line-height:1.1;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+.plab b{display:block;font-weight:500;font-size:clamp(9px,1.15vw,13px);letter-spacing:.22em;text-transform:uppercase;color:rgba(255,222,170,.85)}
+.co{position:absolute;white-space:nowrap;line-height:1.12;text-shadow:0 1px 8px rgba(0,0,0,.95)}
+.co .n{font-size:clamp(12px,1.55vw,19px);font-weight:400;color:#f7f7f4}
+.co .v{font-size:clamp(12px,1.5vw,18px);font-weight:600;color:var(--amber);font-variant-numeric:tabular-nums}
+.co .x{font-family:var(--hand);font-size:clamp(17px,2.1vw,26px);color:var(--chalk);line-height:1}
+.co.right{transform:translate(9px,-50%);text-align:left}
+.co.left{transform:translate(calc(-100% - 9px),-50%);text-align:right}
+
+.loc{position:absolute;right:clamp(10px,2vw,22px);bottom:clamp(10px,2vw,22px);width:clamp(96px,13vw,158px);pointer-events:none;text-align:center}
+.loc svg{width:100%;height:auto;display:block;overflow:visible}
+.loc .ln{position:absolute;right:0;bottom:100%;margin-bottom:4px;font-family:var(--hand);font-size:clamp(15px,1.8vw,22px);color:var(--chalk);line-height:1.05;white-space:nowrap;text-align:right;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+.credit{position:absolute;left:10px;bottom:6px;font-size:9.5px;color:rgba(220,226,218,.55);pointer-events:none;letter-spacing:.02em}
+@media (max-width:680px){.credit{display:none}}
+
+.controls{display:flex;align-items:center;gap:14px;margin-top:12px}
+.btn{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:1px solid rgba(243,168,59,.5);background:var(--amber);color:#1b1205;font-size:15px;cursor:pointer;display:grid;place-items:center}
+.btn:focus-visible,.chap:focus-visible,input[type=range]:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.scrub{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:6px}
+input[type=range]{width:100%;accent-color:var(--amber);cursor:pointer;margin:0}
+.chaps{position:relative;height:18px}
+.chap{position:absolute;transform:translateX(-50%);background:none;border:0;padding:0 2px;color:var(--muted);font:400 11.5px var(--sans);letter-spacing:.05em;cursor:pointer;white-space:nowrap}
+.chap:hover{color:var(--fg)} .chap.on{color:var(--amber)}
+@media (max-width:680px){.chap.minor{display:none}.time{width:auto}}
+.time{flex:0 0 auto;font:400 12px var(--sans);color:var(--faint);font-variant-numeric:tabular-nums;width:78px;text-align:right}
+
+.below{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;margin-top:34px;border-top:1px solid var(--line);padding-top:22px}
+@media (max-width:760px){.below{grid-template-columns:1fr;gap:24px}}
+.below>div{min-width:0}
+.below h2{font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin:0 0 10px}
+.below p{font-weight:300;font-size:15.5px;line-height:1.6;color:#d3d9d2;margin:0 0 10px;max-width:64ch}
+.below ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.below li{font-size:13px;font-weight:300;line-height:1.45;color:var(--muted)}
+.below a{color:#e9ede7;text-decoration:underline;text-decoration-color:rgba(243,168,59,.55);text-underline-offset:2px}
+.below a:hover{color:var(--amber-hi)}
+.fine{font-size:12.5px!important;color:var(--faint)!important}
+</style>
+
+<div class="page">
+  <p class="kicker">Outbreak &middot; 2014&ndash;2026</p>
+  <h1>Ebola has never moved this fast across Africa</h1>
+  <p class="dek">From the West African epidemic of 2014 to the Bundibugyo-virus outbreak in eastern Congo, which has crossed into Uganda and, this month, reached Nairobi. <span class="hand">each spike rises with confirmed cases</span></p>
+
+  <div class="stage" id="stage">
+    <canvas id="gl" role="img" aria-label="Animated 3D map of Ebola cases rising across Africa from 2014 to 2026"></canvas>
+    <div class="ov" id="labels"></div>
+    <div class="vignette"></div>
+    <div class="ov"><svg class="lead" id="lead"></svg></div>
+    <div class="ov" id="callouts"></div>
+    <div class="readout">
+      <div class="r-date" id="rDate"></div>
+      <div class="r-cases" id="rCases"></div>
+      <div class="r-deaths" id="rDeaths"></div>
+      <div class="r-place" id="rPlace"></div>
+      <div class="r-hand" id="rHand"></div>
+    </div>
+    <div class="titlecard" id="titlecard">
+      <div class="tk">Outbreak</div>
+      <div class="tt">Ebola&rsquo;s march east</div>
+      <div class="tb">twelve years in fifty seconds</div>
+    </div>
+    <div class="loc" id="loc"><svg id="locsvg" viewBox="0 0 160 160"></svg><div class="ln" id="locNote"></div></div>
+    <div class="credit">Imagery: Sentinel-2 cloudless 2016 by EOX, contains modified Copernicus Sentinel data &middot; Elevation: AWS Terrain Tiles &middot; Boundaries: Natural Earth, geoBoundaries</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="play" aria-label="Pause">&#10073;&#10073;</button>
+    <div class="scrub">
+      <input type="range" id="scrub" min="0" max="53" step="0.01" value="0" aria-label="Story timeline">
+      <div class="chaps" id="chaps"></div>
+    </div>
+    <div class="time" id="time">0:00</div>
+  </div>
+
+  <div class="below">
+    <div>
+      <h2>How this was made</h2>
+      <p>A 3D spike map built in the browser with three.js. The ground is real: a cloud-free Sentinel-2 satellite mosaic, sharpened over eastern Congo, Kasa&iuml; and West Africa, shaded with relief from an open elevation model so the Albertine Rift and the Rwenzori stand out. Rivers, lakes and borders come from Natural Earth; current DRC provinces from geoBoundaries.</p>
+      <p>Each spike&rsquo;s height is proportional to confirmed cases, on one scale for the whole film, which is why 2014 towers over everything and Kenya&rsquo;s three cases barely leave the ground. 2026 spikes sit on one town per affected province. Totals come from reporting dates; between those dates the curve, and each province&rsquo;s share of it, is interpolated.</p>
+      <p class="fine">Figures for the 2026 outbreak are provisional and are revised as data is reviewed. One linked case was also confirmed in France. Earlier outbreaks show their final totals.</p>
+    </div>
+    <div>
+      <h2>Sources</h2>
+      <ul>
+        <li><a href="https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda" target="_blank" rel="noopener">ECDC</a>: DRC 9,277 confirmed cases and 4,478 deaths by province, data to 14 Oct 2026</li>
+        <li><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615" target="_blank" rel="noopener">WHO Disease Outbreak News</a> and WHO Africa situation reports: 2026 milestones, May to October</li>
+        <li><a href="https://www.aljazeera.com/news/2026/10/16/kenya-reports-third-bundibugyo-strain-ebola-case" target="_blank" rel="noopener">Al Jazeera</a> and <a href="https://www.pbs.org/newshour/health/man-living-in-congo-who-went-back-to-kenya-is-countrys-1st-confirmed-ebola-case-and-death" target="_blank" rel="noopener">AP via PBS</a>: Kenya, 3 cases and 1 death by 16 Oct 2026</li>
+        <li><a href="https://www.cdc.gov/ebola/outbreaks" target="_blank" rel="noopener">US CDC outbreak history</a>: 2014&ndash;16 West Africa, 2018&ndash;20 DRC, 2022 Uganda</li>
+        <li><a href="https://allafrica.com/stories/202512020161.html" target="_blank" rel="noopener">WHO via allAfrica</a>: 2025 Kasa&iuml; outbreak, 64 cases and 45 deaths</li>
+        <li><a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless 2016</a> by EOX IT Services (CC BY 4.0) &middot; <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">Terrain Tiles on AWS</a> &middot; <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> &middot; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> (CC BY 4.0)</li>
+      </ul>
+      <p class="fine">Compiled 18 October 2026.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const D = __DATA__;
+const TEX = __TEXMAP__;
+const HEIGHT_B64 = "__HEIGHT__";
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fmt = n => Math.round(n).toLocaleString("en-US");
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const smooth = u => u*u*(3-2*u);
+
+/* ---------- terrain sampling ---------- */
+const [LON0,LON1,LAT0,LAT1] = D.bounds, [HW,HH] = D.grid, GP = D.gp;
+const LONC=(LON0+LON1)/2, LATC=(LAT0+LAT1)/2;
+const KZ = D.hscale*0.0003;              // metres per byte * world units per metre
+const KH = 0.00053;                      // spike height per confirmed case
+const hB = Uint8Array.from(atob(HEIGHT_B64), c=>c.charCodeAt(0));
+function hAt(lon,lat){
+  const fx = clamp((lon-LON0)*GP,0,HW-1), fy = clamp((LAT1-lat)*GP,0,HH-1);
+  const x0=Math.floor(fx), y0=Math.floor(fy), x1=Math.min(x0+1,HW-1), y1=Math.min(y0+1,HH-1), u=fx-x0, v=fy-y0;
+  return ((hB[y0*HW+x0]*(1-u)+hB[y0*HW+x1]*u)*(1-v)+(hB[y1*HW+x0]*(1-u)+hB[y1*HW+x1]*u)*v)*KZ;
+}
+const X = lon => lon-LONC, Z = lat => -(lat-LATC);
+
+/* ---------- renderer ---------- */
+const stage = document.getElementById("stage"), canvas = document.getElementById("gl");
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.setClearColor(0x050808, 1);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x050808, 10, 40);
+const camera = new THREE.PerspectiveCamera(32, 16/9, 0.1, 400);
+let needsRender = true;
+const loader = new THREE.TextureLoader();
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+D.chunks.forEach(ch=>{
+  const [lo0,lo1,la0,la1] = ch.b;
+  const sx = Math.ceil((lo1-lo0)*GP), sz = Math.ceil((la1-la0)*GP);
+  const g = new THREE.PlaneGeometry(lo1-lo0, la1-la0, sx, sz);
+  g.rotateX(-Math.PI/2);
+  const p = g.attributes.position;
+  const cx = (lo0+lo1)/2, cz = (la0+la1)/2;
+  for(let i=0;i<p.count;i++){
+    const lon = cx + p.getX(i), lat = cz - p.getZ(i);
+    p.setXYZ(i, X(lon), hAt(lon,lat), Z(lat));
+  }
+  const tex = loader.load(TEX[ch.f], ()=>{ needsRender = true; });
+  tex.anisotropy = maxAniso; tex.minFilter = THREE.LinearMipmapLinearFilter;
+  scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({map:tex})));
+});
+
+/* ---------- vectors draped on terrain ---------- */
+function densify(arr, step){
+  const pts=[]; for(let i=0;i+3<arr.length;i+=2){
+    const a=[arr[i],arr[i+1]], b=[arr[i+2],arr[i+3]], n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/step));
+    for(let k=0;k<n;k++) pts.push([a[0]+(b[0]-a[0])*k/n, a[1]+(b[1]-a[1])*k/n]);
+  }
+  pts.push([arr[arr.length-2],arr[arr.length-1]]); return pts;
+}
+function lineLayer(lines, color, opacity, lift){
+  const pos=[];
+  lines.forEach(l=>{ const pts=densify(l,0.05); for(let i=0;i+1<pts.length;i++){ const a=pts[i], b=pts[i+1];
+    pos.push(X(a[0]),hAt(a[0],a[1])+lift,Z(a[1]), X(b[0]),hAt(b[0],b[1])+lift,Z(b[1])); } });
+  const g=new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+  const m=new THREE.LineSegments(g, new THREE.LineBasicMaterial({color, transparent:true, opacity, depthWrite:false}));
+  scene.add(m); return m;
+}
+function ribbon(lines, width, color, opacity, lift){
+  const pos=[], idx=[]; let base=0;
+  lines.forEach(l=>{ const pts=densify(l,0.04).map(([lo,la])=>[X(lo),hAt(lo,la)+lift,Z(la)]); if(pts.length<2) return;
+    for(let i=0;i<pts.length;i++){
+      const a=pts[Math.max(0,i-1)], b=pts[Math.min(pts.length-1,i+1)];
+      let dx=b[0]-a[0], dz=b[2]-a[2]; const L=Math.hypot(dx,dz)||1; const nx=-dz/L*width/2, nz=dx/L*width/2;
+      pos.push(pts[i][0]+nx,pts[i][1],pts[i][2]+nz, pts[i][0]-nx,pts[i][1],pts[i][2]-nz);
+      if(i<pts.length-1){ const k=base+i*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); }
+    }
+    base += pts.length*2; });
+  const g=new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx);
+  const m=new THREE.Mesh(g, new THREE.MeshBasicMaterial({color, transparent:true, opacity, depthWrite:false, side:THREE.DoubleSide}));
+  scene.add(m); return m;
+}
+lineLayer(D.vec.rivers, 0x86aabb, 0.32, 0.012);
+lineLayer(D.vec.borders, 0xe9ede5, 0.30, 0.016);
+const drcLine = ribbon(D.vec.drc, 0.045, 0xf2f2ec, 0.72, 0.02);
+const provMesh = {};
+Object.keys(D.vec.prov).forEach(k=>{ provMesh[k] = ribbon(D.vec.prov[k], 0.035, 0xffcf87, 0, 0.022); provMesh[k].visible=false; });
+
+/* ---------- spikes ---------- */
+const spikeMat = ()=> new THREE.ShaderMaterial({
+  uniforms:{uAlpha:{value:1}, uScar:{value:0}},
+  vertexShader:`varying float vH; varying vec3 vN; void main(){ vH=position.y; vN=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`uniform float uAlpha; uniform float uScar; varying float vH; varying vec3 vN;
+    void main(){ vec3 base=vec3(0.86,0.42,0.08), tip=vec3(1.0,0.86,0.48), scar=vec3(0.55,0.42,0.24);
+      vec3 col=mix(mix(base,tip,pow(vH,0.75)),scar,uScar); float rim=1.0-abs(vN.z);
+      float a=uAlpha*(0.38+0.55*vH+0.35*rim); gl_FragColor=vec4(col*a,a); }`,
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
+const coneGeo = new THREE.ConeGeometry(1,1,7,1,true); coneGeo.translate(0,0.5,0);
+const glowMat = ()=> new THREE.ShaderMaterial({ uniforms:{uAlpha:{value:0}},
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+  fragmentShader:`uniform float uAlpha; varying vec2 vUv; void main(){ float d=distance(vUv,vec2(0.5))*2.0; float a=uAlpha*pow(max(0.0,1.0-d),2.2); gl_FragColor=vec4(vec3(1.0,0.62,0.18)*a,a); }`,
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
+const ringGeo = new THREE.RingGeometry(0.9,1.0,48); ringGeo.rotateX(-Math.PI/2);
+const discGeo = new THREE.PlaneGeometry(2,2); discGeo.rotateX(-Math.PI/2);
+const S = D.spikes.map(sp=>{
+  const g = hAt(sp.lon, sp.lat);
+  const cone = new THREE.Mesh(coneGeo, spikeMat()); cone.position.set(X(sp.lon), g, Z(sp.lat));
+  const glow = new THREE.Mesh(discGeo, glowMat()); glow.position.set(X(sp.lon), g+0.02, Z(sp.lat));
+  const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color:0xffc066, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending}));
+  ring.position.set(X(sp.lon), g+0.03, Z(sp.lat));
+  scene.add(glow); scene.add(cone); scene.add(ring);
+  let appear = sp.keys[0][0]; for(let i=0;i<sp.keys.length;i++){ if(sp.keys[i][1]>0){ appear = sp.keys[Math.max(0,i-1)][0]; break; } }
+  return Object.assign({}, sp, {g, cone, glow, ring, appear});
+});
+const byId = Object.fromEntries(S.map(s=>[s.id,s]));
+function keyVal(keys, t, ease){
+  if(t<=keys[0][0]) return keys[0][1];
+  for(let i=1;i<keys.length;i++){ if(t<=keys[i][0]){ const k0=keys[i-1], k1=keys[i]; let u=(t-k0[0])/(k1[0]-k0[0]); if(ease) u=smooth(u); return k0[1]+(k1[1]-k0[1])*u; } }
+  return keys[keys.length-1][1];
+}
+const dayOf = t => clamp((t-D.t26[0])/(D.t26[1]-D.t26[0])*D.t26[2], 0, D.t26[2]);
+
+/* ---------- HTML/SVG overlays ---------- */
+const labelsEl = document.getElementById("labels"), coEl = document.getElementById("callouts"), lead = document.getElementById("lead");
+const SVGNS = "http://www.w3.org/2000/svg";
+const L = D.labels.map(([t,lon,lat,maxD])=>{ const el=document.createElement("div"); el.className="clab"; el.innerHTML=t.split("|").join("<br>"); labelsEl.appendChild(el);
+  return {el, v:new THREE.Vector3(X(lon), hAt(lon,lat)+0.05, Z(lat)), maxD}; });
+const P = D.provLabels.map(p=>{ const el=document.createElement("div"); el.className="plab"; el.innerHTML=`<b>${p.name}</b>`; el.style.opacity=0; labelsEl.appendChild(el);
+  return Object.assign({el, v:new THREE.Vector3(X(p.lon), hAt(p.lon,p.lat)+0.05, Z(p.lat))}, p); });
+const coNodes = {}, leadNodes = {};
+function callout(id){
+  if(coNodes[id]) return coNodes[id];
+  const s=byId[id], el=document.createElement("div"); el.className="co "+s.side;
+  el.innerHTML=`<div class="n">${s.name}</div><div class="v"></div>`+(s.note?`<div class="x">${s.note}</div>`:"");
+  coEl.appendChild(el); coNodes[id]=el;
+  const g=document.createElementNS(SVGNS,"g");
+  g.innerHTML=`<line stroke="#f3efe4" stroke-width="1.2" stroke-dasharray="1.5 4.5" stroke-linecap="round" opacity=".9"/><circle r="3.6" fill="none" stroke="#f3efe4" stroke-width="1.4"/><circle r="5" fill="none" stroke="#f3efe4" stroke-width="1.5"/>`;
+  lead.appendChild(g); leadNodes[id]=g; return el;
+}
+
+/* ---------- locator map ---------- */
+const locSvg = document.getElementById("locsvg"), locNote = document.getElementById("locNote");
+const LB = D.loc.bounds; // [lon0,lon1,lat0,lat1] of Africa frame
+const lx = lon => (lon-LB[0])/(LB[1]-LB[0])*160, ly = lat => (LB[3]-lat)/(LB[3]-LB[2])*160;
+const locPaths = {};
+D.loc.countries.forEach(c=>{
+  const d = c.rings.map(r=>{ let s=""; for(let i=0;i<r.length;i+=2) s+=(i?"L":"M")+lx(r[i]).toFixed(1)+" "+ly(r[i+1]).toFixed(1); return s+"Z"; }).join("");
+  const p=document.createElementNS(SVGNS,"path"); p.setAttribute("d",d); p.setAttribute("fill","rgba(230,234,226,.16)"); p.setAttribute("stroke","rgba(240,240,232,.35)"); p.setAttribute("stroke-width",".5");
+  locSvg.appendChild(p); locPaths[c.name]=p; });
+const locBox=document.createElementNS(SVGNS,"rect"); locBox.setAttribute("fill","none"); locBox.setAttribute("stroke","#f3efe4"); locBox.setAttribute("stroke-width","1"); locBox.setAttribute("stroke-dasharray","2 2.5"); locSvg.appendChild(locBox);
+const locDot=document.createElementNS(SVGNS,"circle"); locDot.setAttribute("r","3.2"); locDot.setAttribute("fill","#f3a83b"); locDot.setAttribute("stroke","#1b1205"); locDot.setAttribute("stroke-width",".8"); locSvg.appendChild(locDot);
+
+/* ---------- camera ---------- */
+function camAt(t){
+  const k=D.cam; let a=k[0], b=k[k.length-1], u=0;
+  if(t<=k[0][0]){a=b=k[0];} else if(t>=k[k.length-1][0]){a=b=k[k.length-1];}
+  else for(let i=1;i<k.length;i++){ if(t<=k[i][0]){ a=k[i-1]; b=k[i]; u=smooth((t-a[0])/(b[0]-a[0])); break; } }
+  const m=j=>a[j]+(b[j]-a[j])*u; return {lon:m(1), lat:m(2), dist:m(3), pitch:m(4), yaw:m(5)};
+}
+let aspect = 16/9, camState = null;
+function placeCamera(t){
+  const c=camAt(t), fit=Math.pow(Math.max(1,(16/9)/aspect),0.85), d=c.dist*fit, p=c.pitch*Math.PI/180, y=c.yaw*Math.PI/180;
+  const tx=X(c.lon), tz=Z(c.lat), ty=0.3;
+  camera.position.set(tx+Math.sin(y)*Math.cos(p)*d, ty+Math.sin(p)*d, tz+Math.cos(y)*Math.cos(p)*d); camera.lookAt(tx,ty,tz);
+  scene.fog.near=d*0.8; scene.fog.far=d*1.75; camState={...c, d}; return d;
+}
+
+/* ---------- readout ---------- */
+const MONTHS=["Jan.","Feb.","March","April","May","June","July","Aug.","Sept.","Oct.","Nov.","Dec."];
+function dateOf(day){ const dt=new Date(Date.UTC(2026,4,15)); dt.setUTCDate(dt.getUTCDate()+Math.floor(day)); return MONTHS[dt.getUTCMonth()]+" "+dt.getUTCDate()+", 2026"; }
+const $=id=>document.getElementById(id);
+const rDate=$("rDate"), rCases=$("rCases"), rDeaths=$("rDeaths"), rPlace=$("rPlace"), rHand=$("rHand"), titlecard=$("titlecard");
+function phaseAt(t){ return D.phases.find(p=>t>=p.t0 && t<p.t1) || D.phases[D.phases.length-1]; }
+function readout(t, vals, ph){
+  if(ph.date!=="2026"){
+    let c=0,d=0; ph.ids.forEach(id=>{ const s=byId[id], fin=s.keys[s.keys.length-1][1]; c+=vals[id]; d+=s.deaths*(fin?vals[id]/fin:0); });
+    rDate.textContent=ph.date; rCases.textContent=fmt(c)+" Ebola cases"; rDeaths.textContent=c>0?fmt(d)+" deaths":"";
+    rPlace.textContent=ph.place; rHand.textContent=ph.hand;
+  } else {
+    const day=dayOf(t), drc=keyVal(D.drcCases,day), uga=keyVal(D.uga,day), ken=keyVal(D.ken,day);
+    rDate.textContent = t<D.t26[0] ? "May 2026" : dateOf(day);
+    rCases.textContent = fmt(drc+Math.round(uga)+Math.round(ken))+" Ebola cases";
+    if(day>=D.drcDeaths[0][0]){
+      const dd=keyVal(D.drcDeaths,day);
+      rDeaths.textContent=fmt(dd+Math.round(keyVal(D.ugaDeaths,day))+Math.round(keyVal(D.kenDeaths,day)))+" deaths";
+      rHand.textContent = ken>=1 ? "first case in Nairobi on Oct. 6" : "about "+Math.round(dd/drc*100)+"% of confirmed cases have died";
+    } else { rDeaths.textContent=""; rHand.textContent="Bundibugyo virus, declared May 15"; }
+    const parts=["DRC "+fmt(drc)]; if(uga>=1) parts.push("Uganda "+fmt(uga)); if(ken>=1) parts.push("Kenya "+fmt(ken));
+    rPlace.textContent=parts.join(" · ");
+  }
+  titlecard.style.opacity = t<5.2?1 : t<6.6?1-(t-5.2)/1.4 : 0;
+}
+
+/* ---------- frame ---------- */
+const tmp=new THREE.Vector3();
+function toScreen(v,w,h){ tmp.copy(v).project(camera); return {x:(tmp.x*0.5+0.5)*w, y:(-tmp.y*0.5+0.5)*h, ok:tmp.z<1&&tmp.z>-1}; }
+function fadeIn(t, t0, t1, dur){ return clamp(Math.min((t-t0)/dur, (t1-t)/dur), 0, 1); }
+function frame(t){
+  const d=placeCamera(t), ph=phaseAt(t), vals={};
+  S.forEach(s=>{
+    const c=Math.max(0,keyVal(s.keys,t,s.ease)); vals[s.id]=c;
+    const op=keyVal(s.op,t,false), h=c>0?Math.max(0.05,c*KH):0.0001, r=0.06+Math.min(0.075,Math.sqrt(c)*0.0009);
+    s.cone.scale.set(r,h,r); s.cone.visible=c>0; s.cone.material.uniforms.uAlpha.value=op; s.cone.material.uniforms.uScar.value=(1-op)/0.72;
+    const gs=0.35+Math.min(0.9,Math.sqrt(c)*0.008); s.glow.scale.set(gs,1,gs); s.glow.material.uniforms.uAlpha.value=c>0?0.55*op:0;
+    const since=t-s.appear, loop=s.id==="nbo";
+    if(c>0&&(since<2.4||loop)){ const q=loop?((t*0.8)%1):clamp(since/2.4,0,1); const rs=0.15+q*0.75; s.ring.scale.set(rs,1,rs); s.ring.material.opacity=(1-q)*0.6*op; }
+    else s.ring.material.opacity=0;
+  });
+  // province highlights for the current stretch of the story
+  const provOn={}; D.provFocus.forEach(f=>{ const a=fadeIn(t,f.t0,f.t1,0.8); if(a>0) f.keys.forEach(k=>provOn[k]=Math.max(provOn[k]||0,a)); });
+  Object.keys(provMesh).forEach(k=>{ const a=provOn[k]||0; provMesh[k].visible=a>0; provMesh[k].material.opacity=0.85*a; });
+  renderer.render(scene,camera);
+
+  const w=stage.clientWidth, h=stage.clientHeight;
+  L.forEach(l=>{ const p=toScreen(l.v,w,h), hw=(l.el.offsetWidth||80)/2, hh=(l.el.offsetHeight||14)/2;
+    const on=p.ok&&d<=l.maxD&&p.x-hw>6&&p.x+hw<w-6&&p.y-hh>6&&p.y+hh<h-6; l.el.style.opacity=on?1:0; if(on) l.el.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-50%)`; });
+  P.forEach(pl=>{ const a=provOn[pl.key]||0, p=toScreen(pl.v,w,h); const on=a>0&&p.ok&&p.x>40&&p.x<w-40&&p.y>20&&p.y<h-20;
+    pl.el.style.opacity=on?a:0; if(on) pl.el.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-50%)`; });
+
+  const active=new Set(); D.callouts.forEach(c=>{ if(t>=c.t0&&t<c.t1) c.ids.forEach((id,i)=>{ if(w>=560 || i===0 || id==="nbo") active.add(id); }); });
+  Object.keys(coNodes).forEach(id=>{ if(!active.has(id)){ coNodes[id].style.opacity=0; leadNodes[id].style.opacity=0; } });
+  const off = Math.max(34, Math.min(70, w*0.045));
+  active.forEach(id=>{
+    const s=byId[id], c=vals[id], el=callout(id), g=leadNodes[id];
+    if(c<0.5){ el.style.opacity=0; g.style.opacity=0; return; }
+    const tip=new THREE.Vector3(X(s.lon), s.g+Math.max(0.05,c*KH), Z(s.lat)), p=toScreen(tip,w,h);
+    if(!p.ok||p.x<0||p.x>w||p.y<0||p.y>h){ el.style.opacity=0; g.style.opacity=0; return; }
+    el.querySelector(".v").textContent=fmt(c)+(Math.round(c)===1?" case":" cases");
+    const ow=el.offsetWidth||140; let side=s.side;
+    if(side==="right"&&p.x+off+ow>w-8) side="left"; else if(side==="left"&&p.x-off-ow<8) side="right";
+    el.className="co "+side;
+    const ax=p.x+(side==="right"?off:-off), ay=Math.max(22, p.y-off*0.62);
+    el.style.left=ax+"px"; el.style.top=ay+"px"; el.style.opacity=1;
+    const [ln,c1,c2]=g.children; ln.setAttribute("x1",p.x); ln.setAttribute("y1",p.y); ln.setAttribute("x2",ax); ln.setAttribute("y2",ay);
+    c1.setAttribute("cx",p.x); c1.setAttribute("cy",p.y); c2.setAttribute("cx",ax); c2.setAttribute("cy",ay); g.style.opacity=1;
+  });
+
+  // locator
+  const day=dayOf(t); const lc=new Set(ph.loc); if(ph.date==="2026" && keyVal(D.ken,day)>=1) lc.add("Kenya");
+  Object.entries(locPaths).forEach(([n,p])=>{ const on=lc.has(n); p.setAttribute("fill",on?"rgba(243,168,59,.55)":"rgba(230,234,226,.16)"); p.setAttribute("stroke",on?"rgba(255,214,150,.9)":"rgba(240,240,232,.35)"); });
+  const bw=(2*camState.d*Math.tan(16*Math.PI/180))*aspect*0.85, bh=bw/aspect*1.3;
+  const bx=lx(camState.lon-bw/2), by=ly(camState.lat+bh/2), bx2=lx(camState.lon+bw/2), by2=ly(camState.lat-bh/2);
+  locBox.setAttribute("x",bx); locBox.setAttribute("y",by); locBox.setAttribute("width",Math.max(4,bx2-bx)); locBox.setAttribute("height",Math.max(4,by2-by));
+  const fd = ph.dot; locDot.setAttribute("cx",lx(fd[0])); locDot.setAttribute("cy",ly(fd[1]));
+  locNote.textContent = (ph.date==="2026" && keyVal(D.ken,day)>=1) ? D.kenyaNote : ph.locNote;
+  readout(t, vals, ph);
+}
+
+/* ---------- size & playback ---------- */
+function resize(){ const w=stage.clientWidth, h=stage.clientHeight; if(!w||!h) return; aspect=w/h; renderer.setSize(w,h,false); camera.aspect=aspect; camera.updateProjectionMatrix(); needsRender=true; }
+new ResizeObserver(resize).observe(stage);
+const scrub=$("scrub"), playBtn=$("play"), timeEl=$("time"), chapsEl=$("chaps"); scrub.max=D.end;
+const chapBtns=D.chapters.map(([lab,t])=>{ const b=document.createElement("button"); b.className="chap"+((lab==="2022"||lab==="2025")?" minor":""); b.textContent=lab; b.style.left=(t/D.end*100)+"%";
+  b.addEventListener("click",()=>{ T=t; needsRender=true; if(!playing) setPlaying(true); }); chapsEl.appendChild(b); return [b,t]; });
+let T=reduce?D.end:0, playing=!reduce, last=performance.now();
+function setPlaying(v){ playing=v; if(v&&T>=D.end-0.01) T=0; const end=T>=D.end-0.01;
+  playBtn.innerHTML=v?"&#10073;&#10073;":(end?"&#8635;":"&#9654;"); playBtn.setAttribute("aria-label",v?"Pause":(end?"Replay":"Play")); last=performance.now(); }
+playBtn.addEventListener("click",()=>setPlaying(!playing));
+scrub.addEventListener("input",()=>{ T=+scrub.value; needsRender=true; if(playing) setPlaying(false); });
+function ui(){ scrub.value=T; const s=Math.floor(T); timeEl.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")} / 0:${Math.round(D.end)}`;
+  let cur=0; chapBtns.forEach(([b,t],i)=>{ if(T>=t-0.01) cur=i; }); chapBtns.forEach(([b],i)=>b.classList.toggle("on",i===cur)); }
+function loop(now){ const dt=Math.min(0.1,(now-last)/1000); last=now;
+  if(playing){ T+=dt; if(T>=D.end){ T=D.end; setPlaying(false); } needsRender=true; }
+  if(needsRender){ frame(T); ui(); needsRender=false; } requestAnimationFrame(loop); }
+setPlaying(playing); resize(); frame(T); ui(); requestAnimationFrame(loop);
+window.__renderAt=(t)=>{ T=t; playing=false; resize(); frame(T); ui(); };
+window.__ready=()=> loader.manager && true;
+})();
+</script>
