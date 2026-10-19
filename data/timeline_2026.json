@@ -1,0 +1,80 @@
+[
+{
+"day": "2026-05-16",
+"cases": 8,
+"deaths": null,
+"source": "WHO, 16 May"
+},
+{
+"day": "2026-05-29",
+"cases": 225,
+"deaths": null,
+"source": "DRC Ministry of Health via Wikipedia"
+},
+{
+"day": "2026-06-02",
+"cases": 344,
+"deaths": null,
+"source": "DRC Ministry of Health via RIVM"
+},
+{
+"day": "2026-06-07",
+"cases": 550,
+"deaths": null,
+"source": "DRC Ministry of Health via RIVM"
+},
+{
+"day": "2026-06-23",
+"cases": 1138,
+"deaths": null,
+"source": "NYT Opinion graphic (DRC INSP)"
+},
+{
+"day": "2026-07-01",
+"cases": 1460,
+"deaths": 452,
+"source": "WHO DON 612"
+},
+{
+"day": "2026-07-31",
+"cases": 3532,
+"deaths": 1556,
+"source": "Congolese officials via mappr"
+},
+{
+"day": "2026-08-12",
+"cases": 4665,
+"deaths": 2184,
+"source": "WHO DON 615"
+},
+{
+"day": "2026-10-03",
+"cases": 8544,
+"deaths": 4114,
+"source": "DRC snapshot via ebolamap"
+},
+{
+"day": "2026-10-06",
+"cases": 8728,
+"deaths": 4205,
+"source": "WHO DON 619"
+},
+{
+"day": "2026-10-11",
+"cases": 9066,
+"deaths": 4381,
+"source": "WHO Africa situation report 22"
+},
+{
+"day": "2026-10-13",
+"cases": 9144,
+"deaths": 4410,
+"source": "WHO daily update"
+},
+{
+"day": "2026-10-14",
+"cases": 9277,
+"deaths": 4478,
+"source": "ECDC / DRC INSP"
+}
+]

@@ -1,5 +1,5 @@
 import json, math
-LON0, LON1, LAT0, LAT1 = -24.0, 52.0, -16.0, 24.0
+LON0, LON1, LAT0, LAT1 = -28.0, 56.0, -40.5, 40.5
 def inb(p, pad=0.0): return LON0-pad < p[0] < LON1+pad and LAT0-pad < p[1] < LAT1+pad
 def simplify(pts, tol):
     # Douglas-Peucker
@@ -39,21 +39,24 @@ def pack(lines, tol, pad=0.0):
 rv = json.load(open("ne/ne_10m_rivers_lake_centerlines.geojson"))["features"]
 rivers = pack([l for f in rv if f["geometry"] and (f["properties"].get("scalerank") or 9) <= 7 for l in lines_from(f["geometry"])], 0.02)
 ad = json.load(open("ne/ne_10m_admin_0_countries.geojson"))["features"]
-borders, drc = [], []
+borders, countries = [], {}
+want = {"SLE":"Sierra Leone","LBR":"Liberia","GIN":"Guinea","COD":"DR Congo","UGA":"Uganda","KEN":"Kenya"}
 for f in ad:
-    ls = lines_from(f["geometry"])
-    if f["properties"].get("ADM0_A3") == "COD": drc = pack(ls, 0.012, 0.5)
-    borders += ls
-borders = pack(borders, 0.015)
+    if f["properties"].get("CONTINENT") not in ("Africa",): continue
+    ls = lines_from(f["geometry"]); borders += ls
+    a3 = f["properties"].get("ADM0_A3")
+    if a3 in want: countries[want[a3]] = pack(ls, 0.01, 0.5)
+borders = pack(borders, 0.02)
+drc = countries["DR Congo"]
 prov = {}
-for iso, keep in [("COD", None), ("KEN", ["Nairobi"]), ("UGA", None)]:
+keepmap = {"COD": ["Ituri","North Kivu","Kasai","Upper Uele","Tshopo","Lower Uele","South Kivu","Sud-Ubangi"], "KEN": ["Nairobi"], "UGA": ["Central Region"]}
+for iso, keep in keepmap.items():
     g = json.load(open(f"ne/gb_{iso}.geojson"))["features"]
     for f in g:
         n = f["properties"]["shapeName"]
-        if keep and n not in keep: continue
+        if n not in keep: continue
         prov[f"{iso}:{n}"] = pack(lines_from(f["geometry"]), 0.01, 0.5)
-print("UGA names sample", [k for k in prov if k.startswith("UGA")][:12])
-out = {"rivers": rivers, "borders": borders, "drc": drc, "prov": prov}
+out = {"rivers": rivers, "borders": borders, "drc": drc, "prov": prov, "countries": countries}
 s = json.dumps(out, separators=(",", ":"))
-open("tex2/vectors.json", "w").write(s)
-print("rivers", len(rivers), "borders", len(borders), "drc", len(drc), "prov", len(prov), "KB", len(s)//1024)
+open("tex3/vectors.json", "w").write(s)
+print("rivers", len(rivers), "borders", len(borders), "countries", list(countries), "prov", list(prov), "KB", len(s)//1024)

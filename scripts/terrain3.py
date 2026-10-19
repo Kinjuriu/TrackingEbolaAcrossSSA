@@ -5,7 +5,7 @@ from PIL import Image
 from scipy.ndimage import map_coordinates, gaussian_filter
 Image.MAX_IMAGE_PIXELS = None
 SRC = "/mnt/user-data/uploads/Downloads"
-OUT = "/home/claude/tex2"; os.makedirs(OUT, exist_ok=True)
+OUT = "/home/claude/tex3"; os.makedirs(OUT, exist_ok=True)
 
 LON0, LON1, LAT0, LAT1 = -24.0, 52.0, -16.0, 24.0
 CLON = [-24, -14.5, -5, 4.5, 14, 23.5, 33, 42.5, 52]
@@ -42,8 +42,8 @@ def terrarium(path):
     return t[..., 0]*256 + t[..., 1] + t[..., 2]/256 - 32768
 
 print("loading sources")
-s2_base = Mosaic(np.asarray(Image.open(f"{SRC}/s2cloudless2016_z7_x55-82_y55-69.jpg").convert("RGB")).astype(np.float32)/255, 7, 55, 55)
-pack = np.asarray(Image.open(f"{SRC}/s2cloudless2016_detail_pack.jpg").convert("RGB")).astype(np.float32)/255
+s2_base = Mosaic(np.asarray(Image.open(f"{SRC}/s2cloudless2024_z7_x55-82_y55-69.jpg").convert("RGB")).astype(np.float32)/255, 7, 55, 55)
+pack = np.asarray(Image.open(f"{SRC}/s2cloudless2024_detail_pack.jpg").convert("RGB")).astype(np.float32)/255
 s2_det = [Mosaic(pack, 9, 292, 250, 0, 0, 4864, 3072), Mosaic(pack, 8, 140, 128, 0, 3072, 1792, 1536), Mosaic(pack, 8, 117, 119, 1792, 3072, 1792, 1792)]
 dem_base = Mosaic(terrarium(f"{SRC}/terrarium_z7_x55-82_y55-69.png"), 7, 55, 55)
 dem_det = [Mosaic(terrarium(f"{SRC}/terrarium_z9_x292-310_y250-261.png"), 9, 292, 250),
@@ -113,18 +113,18 @@ for j in range(len(CLAT)-1):
         r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
         water = water_mask(lo0, la1, ppd, W, H)
         lum = 0.3*r + 0.59*g + 0.11*b
-        sat = 0.62
+        sat = 0.95
         c = rgb*sat + lum[..., None]*(1-sat)
-        c = np.clip((c-0.035)*1.18, 0, 1)
-        c = np.power(c, 0.88)
-        c = c*(0.35 + 1.05*sh[..., None])            # relief
-        c = np.clip(c*0.92, 0, 1)
+        c = np.clip((c-0.02)*1.12, 0, 1)
+        c = np.power(c, 0.9)
+        c = c*(0.55 + 0.62*sh[..., None])            # relief
+        c = np.clip(c*1.0, 0, 1)
         ocean = np.array([0.028, 0.045, 0.055])
-        c = c*(1-water[..., None]) + (ocean + 0.05*sh[..., None])*water[..., None]
+        c = c*(1-water[..., None]) + np.clip(rgb*0.75, 0, 1)*water[..., None]
         # fade outer rim of the whole map into the background
         LONc, LATc = LON[1:-1, 1:-1], LAT[1:-1, 1:-1]
         m = np.minimum.reduce([(LONc-LON0)/(LON1-LON0), (LON1-LONc)/(LON1-LON0), (LATc-LAT0)/(LAT1-LAT0), (LAT1-LATc)/(LAT1-LAT0)])
-        edge = np.clip(m/0.05, 0, 1)[..., None]
+        edge = np.ones_like(m)[..., None]
         c = c*edge + np.array([0.020, 0.031, 0.031])*(1-edge)
         im = Image.fromarray((np.clip(c, 0, 1)*255).astype(np.uint8))
         buf = io.BytesIO(); im.save(buf, "JPEG", quality=82 if hi else 80, optimize=True, progressive=True)

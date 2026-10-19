@@ -1,0 +1,365 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Ebola Across Africa</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Sacramento&display=swap">
+<style>
+/* Layout: a scroll story. A 3D map on real satellite ground stays pinned to the screen while short
+   chapter cards scroll over it; each chapter flies the camera and raises the spikes. Committed dark look. */
+:root{
+  --bg:#05080a; --panel:rgba(8,12,14,.78); --line:rgba(235,240,232,.14);
+  --fg:#f1f3ef; --muted:#aab4ad; --faint:#6d7870;
+  --amber:#f4a93c; --amber-hi:#ffd27a; --red:#ef6b52; --chalk:#f4f0e6; --over:#c9d1cc;
+  --sans:"Fira Sans","Helvetica Neue",Arial,sans-serif;
+  --hand:"Sacramento","Segoe Script","Brush Script MT",cursive;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+.scrolly{position:relative}
+.stage{position:sticky;top:0;height:100vh;height:100svh;width:100%;overflow:hidden;background:#05080a}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(125% 100% at 60% 45%,rgba(0,0,0,0) 52%,rgba(0,0,0,.55) 100%)}
+.ov{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+
+.readout{position:absolute;top:max(18px,env(safe-area-inset-top,0px));right:max(18px,env(safe-area-inset-right,0px));text-align:right;pointer-events:none}
+.r-date{font-size:clamp(12px,1.5vw,17px);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#f6f7f3;text-shadow:0 1px 8px rgba(0,0,0,.85)}
+.r-cases{font-size:clamp(18px,2.6vw,32px);font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--amber);font-variant-numeric:tabular-nums;text-shadow:0 1px 10px rgba(0,0,0,.85)}
+.r-deaths{font-size:clamp(11px,1.25vw,14px);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--red);font-variant-numeric:tabular-nums;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+
+.clab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;line-height:1.15;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff;
+  text-shadow:0 0 3px rgba(0,0,0,.95),0 1px 10px rgba(0,0,0,.9);transition:opacity .25s linear}
+.clab.l1{font-size:clamp(11px,1.35vw,16px)} .clab.l2{font-size:clamp(9px,1.05vw,12.5px);font-weight:500;color:rgba(255,255,255,.78)}
+.plab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;font-weight:600;font-size:clamp(9.5px,1.1vw,13px);letter-spacing:.2em;text-transform:uppercase;
+  color:#ffd9a0;text-shadow:0 0 3px rgba(0,0,0,.95),0 1px 8px rgba(0,0,0,.9)}
+.rlab{position:absolute;left:0;top:0;transform:translate(-50%,-140%);font-family:var(--hand);font-size:clamp(15px,1.7vw,21px);color:var(--chalk);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,.95)}
+.mlab{position:absolute;left:0;top:0;white-space:nowrap;font-family:var(--hand);font-size:clamp(16px,1.9vw,24px);color:#fff1d6;text-shadow:0 0 3px rgba(0,0,0,.95),0 1px 10px rgba(0,0,0,.95);pointer-events:none}
+.mlab b{font-family:var(--sans);font-weight:600;font-size:.56em;letter-spacing:.12em;color:var(--amber);margin-right:2px}
+.co{position:absolute;white-space:nowrap;line-height:1.14;text-shadow:0 0 3px rgba(0,0,0,.95),0 1px 8px rgba(0,0,0,.95)}
+.co .n{font-size:clamp(12px,1.5vw,18px);font-weight:600;color:#fff}
+.co .v{font-size:clamp(12px,1.45vw,17px);font-weight:600;color:var(--amber);font-variant-numeric:tabular-nums}
+.co .v small{font-weight:400;color:#e9ece6;font-size:.82em}
+.co .x{font-family:var(--hand);font-size:clamp(16px,2vw,25px);color:var(--chalk);line-height:1}
+.co.over .v{color:var(--over)}
+.co.right{transform:translate(9px,-50%);text-align:left}
+.co.left{transform:translate(calc(-100% - 9px),-50%);text-align:right}
+
+.loc{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));width:clamp(92px,11vw,140px);pointer-events:none;transition:opacity .4s}
+.loc svg{width:100%;height:auto;display:block;overflow:visible}
+.credit{position:absolute;right:12px;bottom:4px;font-size:9.5px;color:rgba(225,230,222,.5);pointer-events:none;text-align:right;max-width:60%}
+@media (max-width:700px){.credit{display:none}.loc{bottom:auto;top:96px;width:84px}}
+
+.steps{position:relative;z-index:2;margin-top:-100vh;margin-top:-100svh;pointer-events:none;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.step{min-height:95vh;display:flex;align-items:center}
+.step:first-child{min-height:100vh}
+.step:last-child{min-height:120vh;align-items:flex-start;padding-top:22vh}
+.card{pointer-events:auto;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.card .k{font-size:11.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin:0 0 6px}
+.card h2{font-size:clamp(19px,2.2vw,25px);font-weight:500;line-height:1.18;margin:0 0 8px;text-wrap:balance}
+.card p{font-weight:300;font-size:15.5px;line-height:1.55;color:#dfe4de;margin:0 0 8px}
+.card p:last-child{margin-bottom:0}
+.card b{font-weight:600;color:#fff}
+.card .hand{font-family:var(--hand);font-size:1.75em;line-height:1;color:var(--chalk);font-weight:400}
+.card .tag{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.06em;padding:2px 8px;border-radius:999px;border:1px solid var(--line);margin:2px 6px 0 0;color:var(--muted)}
+.card .tag.z{border-color:rgba(244,169,60,.6);color:#ffd9a0} .card .tag.s{border-color:rgba(160,200,255,.55);color:#cfe1ff} .card .tag.b{border-color:rgba(239,107,82,.7);color:#ffc2b5}
+.hero h1{font-size:clamp(28px,4.4vw,48px);font-weight:500;line-height:1.04;margin:0 0 10px;letter-spacing:-.01em}
+.hero .hand{display:block;margin:0 0 10px}
+.scrollcue{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+@media (max-width:700px){
+  .step{align-items:flex-end;padding-bottom:6vh}
+  .card{max-width:none;width:100%;padding:16px 18px}
+  .card p{font-size:14.5px}
+}
+
+.after{position:relative;z-index:3;background:var(--bg);border-top:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:34px 48px}
+.after .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr 1fr;gap:34px}
+@media (max-width:760px){.after .wrap{grid-template-columns:1fr;gap:24px}}
+.after .wrap>div{min-width:0}
+.after h3{font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin:0 0 10px}
+.after p{font-weight:300;font-size:15px;line-height:1.6;color:#d3d9d2;margin:0 0 10px;max-width:64ch}
+.after ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.after li{font-size:13px;font-weight:300;line-height:1.45;color:var(--muted)}
+.after a{color:#e9ede7;text-decoration:underline;text-decoration-color:rgba(244,169,60,.55);text-underline-offset:2px}
+.after a:hover{color:var(--amber-hi)}
+.fine{font-size:12.5px!important;color:var(--faint)!important}
+</style>
+
+<div class="scrolly">
+  <div class="stage" id="stage">
+    <canvas id="gl" role="img" aria-label="3D map of Ebola outbreaks across Africa, 2014 to 2026, that changes as you scroll"></canvas>
+    <div class="ov" id="labels"></div>
+    <div class="vignette"></div>
+    <div class="ov"><svg class="lead" id="lead"></svg></div>
+    <div class="ov" id="callouts"></div>
+    <div class="readout"><div class="r-date" id="rDate"></div><div class="r-cases" id="rCases"></div><div class="r-deaths" id="rDeaths"></div></div>
+    <div class="loc" id="loc"><svg id="locsvg" viewBox="0 0 160 160"></svg></div>
+    <div class="credit" id="credit"></div>
+  </div>
+
+  <div class="steps" id="steps">
+__STEPS__
+  </div>
+</div>
+
+<div class="after">
+  <div class="wrap">
+    <div>
+      <h3>How this was made</h3>
+      <p>A 3D spike map built in the browser with three.js. The ground is a cloud-free 2024 Sentinel-2 satellite mosaic in natural colour, sharpened over West Africa, eastern DR Congo, Kasa&iuml; and East Africa, and shaded with relief from an open elevation model. The whole-continent views use NASA&rsquo;s Blue Marble and Black Marble.</p>
+      <p>Each spike&rsquo;s height is proportional to confirmed cases on one scale; in the whole-continent views spikes switch to a square-root scale so small outbreaks stay visible. West African spikes are national totals, one per country. 2026 spikes are province totals, placed on each province&rsquo;s main town; between reporting dates the curve, and each province&rsquo;s share of it, is interpolated.</p>
+      <p class="fine">2026 figures are confirmed cases and are provisional. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. One linked 2026 case was also confirmed in France. Ebola is never eradicated, because the virus survives in animals; WHO declares an outbreak over after 42 days with no new cases.</p>
+    </div>
+    <div>
+      <h3>Sources</h3>
+      <ul>
+__SOURCES__
+      </ul>
+      <p class="fine">Compiled 19 October 2026.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const D = __DATA__;
+const TEX = __TEXMAP__;
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fmt = n => Math.round(n).toLocaleString("en-US");
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const smooth = u => u*u*(3-2*u);
+const ramp = (t,a,b)=> clamp((t-a)/(b-a),0,1);
+function keyVal(keys, t, ease){
+  if(t<=keys[0][0]) return keys[0][1];
+  for(let i=1;i<keys.length;i++){ if(t<=keys[i][0]){ const k0=keys[i-1], k1=keys[i]; let u=(t-k0[0])/(k1[0]-k0[0]); if(ease) u=smooth(u); return k0[1]+(k1[1]-k0[1])*u; } }
+  return keys[keys.length-1][1];
+}
+
+/* ---------- height sampling (detail region and whole continent) ---------- */
+function grid(g){ const b=Uint8Array.from(atob(g.b64), c=>c.charCodeAt(0)); const [L0,L1,A0,A1]=g.bounds, [W,H]=g.grid, gp=g.gp;
+  return (lon,lat)=>{ const fx=clamp((lon-L0)*gp,0,W-1), fy=clamp((A1-lat)*gp,0,H-1); const x0=Math.floor(fx), y0=Math.floor(fy), x1=Math.min(x0+1,W-1), y1=Math.min(y0+1,H-1), u=fx-x0, v=fy-y0;
+    return ((b[y0*W+x0]*(1-u)+b[y0*W+x1]*u)*(1-v)+(b[y1*W+x0]*(1-u)+b[y1*W+x1]*u)*v)*g.hscale*0.0003; }; }
+const hDet = grid(D.det), hCon = grid(D.cont);
+const [DL0,DL1,DA0,DA1] = D.det.bounds;
+const inDet = (lon,lat)=> lon>DL0+0.05 && lon<DL1-0.05 && lat>DA0+0.05 && lat<DA1-0.05;
+const hAt = (lon,lat)=> inDet(lon,lat) ? hDet(lon,lat) : hCon(lon,lat)*0.92;
+const LONC=12, LATC=2;
+const X = lon => lon-LONC, Z = lat => -(lat-LATC);
+
+/* ---------- renderer ---------- */
+const stage=document.getElementById("stage"), canvas=document.getElementById("gl");
+const renderer=new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.setClearColor(0x05080a,1);
+const scene=new THREE.Scene(); scene.fog=new THREE.Fog(0x05080a,10,40);
+const camera=new THREE.PerspectiveCamera(32,16/9,0.1,900);
+let needsRender=true; const loader=new THREE.TextureLoader(); const aniso=renderer.capabilities.getMaxAnisotropy();
+function plane(b, gp, hfn, yoff){
+  const [lo0,lo1,la0,la1]=b, sx=Math.ceil((lo1-lo0)*gp), sz=Math.ceil((la1-la0)*gp);
+  const g=new THREE.PlaneGeometry(lo1-lo0, la1-la0, sx, sz); g.rotateX(-Math.PI/2);
+  const p=g.attributes.position, cx=(lo0+lo1)/2, cz=(la0+la1)/2;
+  for(let i=0;i<p.count;i++){ const lon=cx+p.getX(i), lat=cz-p.getZ(i); p.setXYZ(i, X(lon), hfn(lon,lat)+yoff, Z(lat)); }
+  return g;
+}
+function tex(name){ const t=loader.load(TEX[name], ()=>{ needsRender=true; }); t.anisotropy=aniso; t.minFilter=THREE.LinearMipmapLinearFilter; return t; }
+// whole continent: Blue Marble with Black Marble over it
+const contGeo = plane(D.cont.bounds, D.cont.gp, (lo,la)=>hCon(lo,la)*0.92, -0.05);
+const blueMat = new THREE.MeshBasicMaterial({map:tex("bluemarble.jpg")});
+const blackMat = new THREE.MeshBasicMaterial({map:tex("blackmarble.jpg"), transparent:true, opacity:0, depthWrite:false});
+scene.add(new THREE.Mesh(contGeo, blueMat));
+const blackMesh = new THREE.Mesh(contGeo, blackMat); blackMesh.renderOrder=1; scene.add(blackMesh);
+// sharp Sentinel-2 chunks over the story region
+const chunkMats=[];
+D.chunks.forEach(ch=>{ const m=new THREE.MeshBasicMaterial({map:tex(ch.f), transparent:true, opacity:1}); chunkMats.push(m);
+  const mesh=new THREE.Mesh(plane(ch.b, D.det.gp, hDet, 0), m); mesh.renderOrder=2; scene.add(mesh); });
+
+/* ---------- vectors draped on the ground ---------- */
+function densify(arr, step){ const pts=[]; for(let i=0;i+3<arr.length;i+=2){ const a=[arr[i],arr[i+1]], b=[arr[i+2],arr[i+3]], n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/step));
+  for(let k=0;k<n;k++) pts.push([a[0]+(b[0]-a[0])*k/n, a[1]+(b[1]-a[1])*k/n]); } pts.push([arr[arr.length-2],arr[arr.length-1]]); return pts; }
+function lineLayer(lines, color, opacity, lift){ const pos=[];
+  lines.forEach(l=>{ const pts=densify(l,0.06); for(let i=0;i+1<pts.length;i++){ const a=pts[i], b=pts[i+1]; pos.push(X(a[0]),hAt(a[0],a[1])+lift,Z(a[1]), X(b[0]),hAt(b[0],b[1])+lift,Z(b[1])); } });
+  const g=new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+  const m=new THREE.LineSegments(g, new THREE.LineBasicMaterial({color, transparent:true, opacity, depthWrite:false})); m.renderOrder=3; scene.add(m); return m; }
+function ribbon(lines, width, color, lift, dash){ const pos=[], idx=[]; let base=0;
+  lines.forEach(l=>{ const pts=densify(l, dash?0.03:0.04).map(([lo,la])=>[X(lo),hAt(lo,la)+lift,Z(la)]); if(pts.length<2) return;
+    for(let i=0;i<pts.length;i++){ const a=pts[Math.max(0,i-1)], b=pts[Math.min(pts.length-1,i+1)]; let dx=b[0]-a[0], dz=b[2]-a[2]; const L=Math.hypot(dx,dz)||1, nx=-dz/L*width/2, nz=dx/L*width/2;
+      pos.push(pts[i][0]+nx,pts[i][1],pts[i][2]+nz, pts[i][0]-nx,pts[i][1],pts[i][2]-nz);
+      if(i<pts.length-1 && (!dash || (Math.floor(i/3)%2===0))){ const k=base+i*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); } }
+    base+=pts.length*2; });
+  const g=new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx);
+  const m=new THREE.Mesh(g, new THREE.MeshBasicMaterial({color, transparent:true, opacity:0, depthWrite:false, side:THREE.DoubleSide})); m.renderOrder=4; m.visible=false; scene.add(m); return m; }
+const rivers = lineLayer(D.vec.rivers, 0x9cc3d6, 0.35, 0.012);
+const borders = lineLayer(D.vec.borders, 0xffffff, 0.42, 0.016);
+const outlines = {};
+function outline(key, color){ const id=key+"|"+color; if(outlines[id]) return outlines[id];
+  const src = key.startsWith("C:") ? D.vec.countries[key.slice(2)] : D.vec.prov[key];
+  outlines[id] = ribbon(src||[], key.startsWith("C:")?0.07:0.045, color==="over"?0xd8dfda:(color==="prov"?0xffd08a:0xffffff), 0.024); return outlines[id]; }
+// Kenya case route
+const routeMesh = ribbon([D.route.flatMap(p=>[p[1],p[2]])], 0.045, 0xf4f0e6, 0.03, true);
+const routeIdx = routeMesh.geometry.index.count;
+
+/* ---------- march line: order outbreaks appeared ---------- */
+const marchPts=[];
+D.march.forEach((a,i)=>{ if(i===0) return; const p=D.march[i-1], n=70, dist=Math.hypot(a[1]-p[1],a[2]-p[2]);
+  for(let k=(i===1?0:1);k<=n;k++){ const u=k/n, lon=p[1]+(a[1]-p[1])*u, lat=p[2]+(a[2]-p[2])*u;
+    marchPts.push([X(lon), hCon(lon,lat)*0.92+0.35+Math.sin(Math.PI*u)*Math.max(1.2,dist*0.16), Z(lat)]); } });
+const marchMesh=(()=>{ const pos=[], idx=[], wdt=0.32;
+  for(let i=0;i<marchPts.length;i++){ const a=marchPts[Math.max(0,i-1)], b=marchPts[Math.min(marchPts.length-1,i+1)]; const dx=b[0]-a[0], dz=b[2]-a[2], L=Math.hypot(dx,dz)||1, nx=-dz/L*wdt/2, nz=dx/L*wdt/2;
+    pos.push(marchPts[i][0]+nx,marchPts[i][1],marchPts[i][2]+nz, marchPts[i][0]-nx,marchPts[i][1],marchPts[i][2]-nz);
+    if(i<marchPts.length-1 && Math.floor(i/4)%2===0){ const k=i*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); } }
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx);
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xfff1d6,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide})); m.renderOrder=7; m.visible=false; scene.add(m); return m; })();
+const marchIdx=marchMesh.geometry.index.count, marchVerts=marchPts.length;
+
+/* ---------- spikes ---------- */
+const spikeMat=()=>new THREE.ShaderMaterial({ uniforms:{uAlpha:{value:1},uScar:{value:0}},
+  vertexShader:`varying float vH; varying vec3 vN; void main(){ vH=position.y; vN=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`uniform float uAlpha; uniform float uScar; varying float vH; varying vec3 vN;
+    void main(){ vec3 base=vec3(0.88,0.43,0.08), tip=vec3(1.0,0.87,0.5), scar=vec3(0.62,0.66,0.64);
+      vec3 col=mix(mix(base,tip,pow(vH,0.75)),scar,uScar); float rim=1.0-abs(vN.z);
+      float a=uAlpha*(0.4+0.55*vH+0.35*rim); gl_FragColor=vec4(col*a,a); }`,
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
+const coneGeo=new THREE.ConeGeometry(1,1,7,1,true); coneGeo.translate(0,0.5,0);
+const glowMat=()=>new THREE.ShaderMaterial({ uniforms:{uAlpha:{value:0},uCol:{value:new THREE.Color(1.0,0.62,0.18)}},
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+  fragmentShader:`uniform float uAlpha; uniform vec3 uCol; varying vec2 vUv; void main(){ float d=distance(vUv,vec2(0.5))*2.0; float a=uAlpha*pow(max(0.0,1.0-d),2.2); gl_FragColor=vec4(uCol*a,a); }`,
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
+const ringGeo=new THREE.RingGeometry(0.88,1.0,48); ringGeo.rotateX(-Math.PI/2);
+const discGeo=new THREE.PlaneGeometry(2,2); discGeo.rotateX(-Math.PI/2);
+const KH=0.00053;
+const S=D.spikes.map(sp=>{ const g=hAt(sp.lon,sp.lat);
+  const cone=new THREE.Mesh(coneGeo, spikeMat()); cone.position.set(X(sp.lon),g,Z(sp.lat)); cone.renderOrder=6;
+  const glow=new THREE.Mesh(discGeo, glowMat()); glow.position.set(X(sp.lon),g+0.02,Z(sp.lat)); glow.renderOrder=5;
+  const ring=new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color:0xffc066,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending})); ring.position.set(X(sp.lon),g+0.03,Z(sp.lat)); ring.renderOrder=5;
+  scene.add(glow); scene.add(cone); scene.add(ring);
+  let appear=sp.keys[0][0]; for(let i=0;i<sp.keys.length;i++){ if(sp.keys[i][1]>0){ appear=sp.keys[Math.max(0,i-1)][0]; break; } }
+  return Object.assign({}, sp, {g, cone, glow, ring, appear}); });
+const byId=Object.fromEntries(S.map(s=>[s.id,s]));
+
+/* ---------- overlays ---------- */
+const labelsEl=document.getElementById("labels"), coEl=document.getElementById("callouts"), lead=document.getElementById("lead"), NS="http://www.w3.org/2000/svg";
+const CL=D.countryLabels.map(c=>{ const el=document.createElement("div"); el.className="clab "+(c.big?"l1":"l2"); el.textContent=c.name; labelsEl.appendChild(el);
+  return Object.assign({el, v:new THREE.Vector3(X(c.lon), hAt(c.lon,c.lat)+0.06, Z(c.lat))}, c); });
+const PL=D.provLabels.map(p=>{ const el=document.createElement("div"); el.className="plab"; el.textContent=p.name; el.style.opacity=0; labelsEl.appendChild(el);
+  return Object.assign({el, v:new THREE.Vector3(X(p.lon), hAt(p.lon,p.lat)+0.06, Z(p.lat))}, p); });
+const RL=D.route.filter(r=>r[3]).map(r=>{ const el=document.createElement("div"); el.className="rlab"; el.textContent=r[0]; el.style.opacity=0; labelsEl.appendChild(el);
+  return {el, t:r[3], v:new THREE.Vector3(X(r[1]), hAt(r[1],r[2])+0.05, Z(r[2]))}; });
+const ML=D.march.map((m,i)=>[m,i]).filter(([m,i])=>m[4]).map(([m,i])=>{ const el=document.createElement("div"); el.className="mlab"; el.innerHTML=`<b>${m[3]}</b> ${m[0]}`; el.style.opacity=0; labelsEl.appendChild(el);
+  return {el, i, v:new THREE.Vector3(X(m[1]), hCon(m[1],m[2])*0.92+0.4, Z(m[2]))}; });
+const coNodes={}, leadNodes={};
+function callout(id){ if(coNodes[id]) return coNodes[id]; const s=byId[id], el=document.createElement("div"); el.className="co right";
+  el.innerHTML=`<div class="n"></div><div class="v"></div><div class="x"></div>`; el.querySelector(".n").textContent=s.label; coEl.appendChild(el); coNodes[id]=el;
+  const g=document.createElementNS(NS,"g"); g.innerHTML=`<line stroke="#f4f0e6" stroke-width="1.2" stroke-dasharray="1.5 4.5" stroke-linecap="round" opacity=".95"/><circle r="3.6" fill="none" stroke="#f4f0e6" stroke-width="1.4"/><circle r="5" fill="none" stroke="#f4f0e6" stroke-width="1.5"/>`;
+  lead.appendChild(g); leadNodes[id]=g; return el; }
+// locator
+const locSvg=document.getElementById("locsvg"), LB=D.loc.bounds, lx=lon=>(lon-LB[0])/(LB[1]-LB[0])*160, ly=lat=>(LB[3]-lat)/(LB[3]-LB[2])*160, locPaths={};
+D.loc.countries.forEach(c=>{ const d=c.rings.map(r=>{ let s=""; for(let i=0;i<r.length;i+=2) s+=(i?"L":"M")+lx(r[i]).toFixed(1)+" "+ly(r[i+1]).toFixed(1); return s+"Z"; }).join("");
+  const p=document.createElementNS(NS,"path"); p.setAttribute("d",d); p.setAttribute("stroke-width",".5"); locSvg.appendChild(p); locPaths[c.name]=p; });
+const locBox=document.createElementNS(NS,"rect"); locBox.setAttribute("fill","none"); locBox.setAttribute("stroke","#f4f0e6"); locBox.setAttribute("stroke-dasharray","2 2.5"); locSvg.appendChild(locBox);
+document.getElementById("credit").textContent=D.credit;
+
+/* ---------- camera ---------- */
+function camAt(t){ const k=D.cam; let a=k[0], b=k[k.length-1], u=0;
+  if(t<=k[0][0]){a=b=k[0];} else if(t>=k[k.length-1][0]){a=b=k[k.length-1];}
+  else for(let i=1;i<k.length;i++){ if(t<=k[i][0]){ a=k[i-1]; b=k[i]; u=smooth((t-a[0])/(b[0]-a[0])); break; } }
+  // distance eases in log space so long pull-outs feel even
+  const m=j=>a[j]+(b[j]-a[j])*u, dist=Math.exp(Math.log(a[3])+(Math.log(b[3])-Math.log(a[3]))*u);
+  return {lon:m(1),lat:m(2),dist,pitch:m(4),yaw:m(5)}; }
+let aspect=16/9, cam=null;
+function placeCamera(t){ const c=camAt(t), narrow=aspect<1, fit=Math.pow(Math.max(1,(16/9)/aspect),0.8), d=c.dist*fit, p=c.pitch*Math.PI/180, y=c.yaw*Math.PI/180;
+  const tx=X(c.lon)+(narrow?0:-0.07*d*(aspect>1.3?1:0)), tz=Z(c.lat)+(narrow?0.12*d:0), ty=0.3;
+  camera.position.set(tx+Math.sin(y)*Math.cos(p)*d, ty+Math.sin(p)*d, tz+Math.cos(y)*Math.cos(p)*d); camera.lookAt(tx,ty,tz);
+  scene.fog.near=d*0.9; scene.fog.far=d*(2.2+ramp(t,D.pull[0],D.pull[1])*2); cam={...c,d}; return d; }
+
+/* ---------- readout ---------- */
+const MONTHS=["Jan.","Feb.","March","April","May","June","July","Aug.","Sept.","Oct.","Nov.","Dec."];
+const dayOf = t => keyVal(D.dayMap, t, false);
+function dateOf(day){ const dt=new Date(Date.UTC(2026,4,15)); dt.setUTCDate(dt.getUTCDate()+Math.floor(day)); return MONTHS[dt.getUTCMonth()]+" "+dt.getUTCDate()+", 2026"; }
+const rDate=document.getElementById("rDate"), rCases=document.getElementById("rCases"), rDeaths=document.getElementById("rDeaths");
+function readout(t, vals){ const ph=D.phases.find(p=>t>=p.t0&&t<p.t1)||D.phases[D.phases.length-1];
+  if(ph.kind==="2026"){ const day=dayOf(t); const drc=keyVal(D.drcCases,day), uga=keyVal(D.uga,day), ken=vals.nbo||0;
+    rDate.textContent=t<D.dayMap[1][0]?"May 2026":dateOf(day); rCases.textContent=fmt(drc+Math.round(uga)+Math.round(ken))+" cases";
+    rDeaths.textContent= day>=D.drcDeaths[0][0] ? fmt(keyVal(D.drcDeaths,day)+Math.round(keyVal(D.ugaDeaths,day))+(ken>=1?1:0))+" deaths" : ""; return; }
+  let c=0,d=0; (ph.ids==="all"?S.map(s=>s.id):ph.ids).forEach(id=>{ const s=byId[id], fin=s.keys[s.keys.length-1][1]; c+=vals[id]; d+=s.deaths*(fin?vals[id]/fin:0); });
+  rDate.textContent=ph.date; rCases.textContent=c>0?fmt(c)+" cases":""; rDeaths.textContent=c>0?fmt(d)+" deaths":""; }
+
+/* ---------- frame ---------- */
+const tmp=new THREE.Vector3();
+function toScreen(v,w,h){ tmp.copy(v).project(camera); return {x:(tmp.x*0.5+0.5)*w, y:(-tmp.y*0.5+0.5)*h, ok:tmp.z<1&&tmp.z>-1}; }
+function win(t,a,b,f){ return clamp(Math.min((t-a)/f,(b-t)/f),0,1); }
+function frame(t){
+  const d=placeCamera(t), vals={}, w=stage.clientWidth, h=stage.clientHeight;
+  const pull=ramp(t,D.pull[0],D.pull[1]), night=ramp(t,D.night[0],D.night[1]);
+  chunkMats.forEach(m=>{ m.opacity=1-pull; m.visible=pull<0.999; });
+  blackMat.opacity=night; rivers.material.opacity=0.35*(1-pull); borders.material.opacity=0.42*(1-pull)+0.22*pull;
+  const sscale=1+ (D.pullScale-1)*smooth(pull);
+  S.forEach(s=>{ const c=Math.max(0,keyVal(s.keys,t,s.ease)); vals[s.id]=c;
+    const over = s.overT!=null ? ramp(t,s.overT,s.overT+0.8) : 0;
+    const hgt=c>0?Math.max(0.05, c*KH*(1-smooth(pull)) + Math.sqrt(c)*0.022*smooth(pull)):0.0001, r=(0.06+Math.min(0.075,Math.sqrt(c)*0.0009))*(1+(sscale-1)*0.35);
+    s.cone.scale.set(r,hgt,r); s.cone.visible=c>0; s.cone.material.uniforms.uAlpha.value=1-0.62*over; s.cone.material.uniforms.uScar.value=over;
+    const gs=(0.35+Math.min(0.9,Math.sqrt(c)*0.008))*(1+(sscale-1)*0.5); s.glow.scale.set(gs,1,gs); s.glow.material.uniforms.uAlpha.value=c>0?0.55*(1-0.7*over):0;
+    const since=t-s.appear, loop=s.id==="nbo"&&t<D.pull[0];
+    if(c>0&&(since<1.6||loop)){ const q=loop?((performance.now()/1250)%1):clamp(since/1.6,0,1), rs=0.15+q*0.75; s.ring.scale.set(rs,1,rs); s.ring.material.opacity=(1-q)*0.6; } else s.ring.material.opacity=0; });
+  // outlines for this chapter
+  const on={}; D.outlines.forEach(o=>{ const a=win(t,o.t0,o.t1,0.6); if(a>0){ const id=o.key+"|"+(o.color||"active"); on[id]=Math.max(on[id]||0,a); outline(o.key,o.color||"active"); } });
+  Object.entries(outlines).forEach(([id,m])=>{ const a=on[id]||0; m.visible=a>0; m.material.opacity=(id.includes("|over")?0.75:0.9)*a; });
+  const rp=ramp(t,D.routeT[0],D.routeT[1]), ra=win(t,D.routeT[0]-0.2,D.routeT[2],0.4);
+  routeMesh.visible=ra>0; routeMesh.material.opacity=0.9*ra; routeMesh.geometry.setDrawRange(0, Math.floor(routeIdx*rp/6)*6);
+  const mp=ramp(t,D.marchT[0],D.marchT[1]);
+  marchMesh.visible=mp>0; marchMesh.material.opacity=0.95*Math.min(1,mp*3); marchMesh.geometry.setDrawRange(0, Math.floor(marchIdx*mp/6)*6);
+  renderer.render(scene,camera);
+
+  CL.forEach(c=>{ const p=toScreen(c.v,w,h), hw=(c.el.offsetWidth||80)/2, show=(t>=c.from && t<c.to) && d>=c.dmin && d<=c.dmax;
+    const ok=show&&(w>=600||c.big)&&p.ok&&p.x-hw>6&&p.x+hw<w-6&&p.y>14&&p.y<h-14; c.el.style.opacity=ok?1:0; if(ok) c.el.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-50%)`; });
+  PL.forEach(pl=>{ const a=Math.max(0,...D.outlines.filter(o=>o.key===pl.key).map(o=>win(t,o.t0,o.t1,0.6))), p=toScreen(pl.v,w,h), ok=a>0&&w>=600&&p.ok&&p.x>40&&p.x<w-40&&p.y>20&&p.y<h-20;
+    pl.el.style.opacity=ok?a:0; if(ok) pl.el.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-50%)`; });
+  RL.forEach(r=>{ const a=ra*ramp(t,r.t,r.t+0.15), p=toScreen(r.v,w,h), ok=a>0&&w>=600&&p.ok&&p.x>30&&p.x<w-30; r.el.style.opacity=ok?a:0; if(ok) r.el.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-140%)`; });
+
+  ML.forEach(m=>{ const reach=(m.i/(D.march.length-1)); const a=mp>=reach-0.001 && mp>0 ? Math.min(1,(mp-reach)*8+ (m.i===0?1:0)) : 0; const p=toScreen(m.v,w,h);
+    const ok=a>0&&p.ok&&p.x>20&&p.x<w-20&&p.y>20&&p.y<h-20; m.el.style.opacity=ok?Math.max(0.0,Math.min(1,a)):0; if(ok) m.el.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-150%)`; });
+  const active=new Set(); D.callouts.forEach(c=>{ if(t>=c.t0&&t<c.t1) c.ids.forEach((id,i)=>{ if(w>=600||i===0||id==="nbo") active.add(id); }); });
+  Object.keys(coNodes).forEach(id=>{ if(!active.has(id)){ coNodes[id].style.opacity=0; leadNodes[id].style.opacity=0; } });
+  const off=Math.max(34,Math.min(68,w*0.045));
+  active.forEach(id=>{ const s=byId[id], c=vals[id], el=callout(id), g=leadNodes[id];
+    if(c<0.5){ el.style.opacity=0; g.style.opacity=0; return; }
+    const tip=new THREE.Vector3(X(s.lon), s.g+Math.max(0.05, c*KH*(1-smooth(pull)) + Math.sqrt(c)*0.022*smooth(pull)), Z(s.lat)), p=toScreen(tip,w,h);
+    if(!p.ok||p.x<0||p.x>w||p.y<0||p.y>h){ el.style.opacity=0; g.style.opacity=0; return; }
+    const over = s.overT!=null && t>=s.overT+0.3;
+    el.querySelector(".v").innerHTML = fmt(c)+(Math.round(c)===1?" case":" cases")+(s.kind?` <small>· ${s.kind}</small>`:"");
+    el.querySelector(".x").textContent = over ? "declared over "+s.overText : s.virus;
+    const ow=el.offsetWidth||150; let side=s.side||"right";
+    if(side==="right"&&p.x+off+ow>w-8) side="left"; else if(side==="left"&&p.x-off-ow<8) side="right";
+    el.className="co "+side+(over?" over":"");
+    const ax=p.x+(side==="right"?off:-off)*(s.dx||1), ay=clamp(p.y-off*0.62+(s.dy||0),56,h-40);
+    el.style.left=ax+"px"; el.style.top=ay+"px"; el.style.opacity=1;
+    const [ln,c1,c2]=g.children; ln.setAttribute("x1",p.x); ln.setAttribute("y1",p.y); ln.setAttribute("x2",ax); ln.setAttribute("y2",ay);
+    c1.setAttribute("cx",p.x); c1.setAttribute("cy",p.y); c2.setAttribute("cx",ax); c2.setAttribute("cy",ay); g.style.opacity=1; });
+
+  // locator
+  const ph=D.phases.find(p=>t>=p.t0&&t<p.t1)||D.phases[D.phases.length-1]; const hot=new Set(ph.loc||[]);
+  Object.entries(locPaths).forEach(([n,p])=>{ const h1=hot.has(n); p.setAttribute("fill",h1?"rgba(244,169,60,.6)":"rgba(230,234,226,.18)"); p.setAttribute("stroke",h1?"rgba(255,214,150,.95)":"rgba(240,240,232,.38)"); });
+  const bw=(2*cam.d*Math.tan(16*Math.PI/180))*aspect*0.85, bh=bw/aspect*1.3;
+  locBox.setAttribute("x",lx(cam.lon-bw/2)); locBox.setAttribute("y",ly(cam.lat+bh/2)); locBox.setAttribute("width",Math.max(4,lx(cam.lon+bw/2)-lx(cam.lon-bw/2))); locBox.setAttribute("height",Math.max(4,ly(cam.lat-bh/2)-ly(cam.lat+bh/2)));
+  document.getElementById("loc").style.opacity = 1-pull;
+  readout(t, vals);
+}
+
+/* ---------- scroll drives the story ---------- */
+const steps=[...document.querySelectorAll(".step")].map(el=>({el, t:+el.dataset.t}));
+function targetT(){ const mid=window.innerHeight*0.55; const c=steps.map(s=>{ const r=s.el.getBoundingClientRect(); return r.top+r.height/2; });
+  if(mid<=c[0]) return steps[0].t; for(let i=0;i<c.length-1;i++){ if(mid<c[i+1]){ const u=clamp((mid-c[i])/(c[i+1]-c[i]),0,1); return steps[i].t+(steps[i+1].t-steps[i].t)*u; } } return steps[steps.length-1].t; }
+function resize(){ const w=stage.clientWidth, h=stage.clientHeight; if(!w||!h) return; aspect=w/h; renderer.setSize(w,h,false); camera.aspect=aspect; camera.updateProjectionMatrix(); needsRender=true; }
+new ResizeObserver(resize).observe(stage);
+let T=targetT(), manual=false, last=performance.now();
+function loop(now){ const dt=Math.min(0.1,(now-last)/1000); last=now;
+  if(!manual){ const tg=targetT(); const nt = reduce ? tg : T+(tg-T)*Math.min(1,dt*5); if(Math.abs(nt-T)>1e-4){ T=nt; needsRender=true; } }
+  if(byId.nbo && T>=D.routeT[2]-0.5 && T<D.pull[0]) needsRender=true;
+  if(needsRender){ frame(T); needsRender=false; } requestAnimationFrame(loop); }
+resize(); frame(T); requestAnimationFrame(loop);
+window.__renderAt=(t)=>{ manual=true; T=t; resize(); frame(T); };
+window.__storyEnd=D.end;
+})();
+</script>

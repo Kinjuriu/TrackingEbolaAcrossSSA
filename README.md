@@ -1,49 +1,64 @@
 # Tracking Ebola Across Sub-Saharan Africa
 
-An animated 3D spike map that follows Ebola from the West African epidemic of 2014 to the Bundibugyo-virus outbreak in eastern DR Congo, which crossed into Uganda and, in October 2026, reached Nairobi. It plays like a 53-second film over real satellite relief, and every spike rises with confirmed cases.
+Twelve years of Ebola outbreaks, told place by place, from Sierra Leone in 2014 to Nairobi in 2026. The project has three parts:
 
-- **Live page:** `docs/index.html` (turn on GitHub Pages from the `docs` folder to publish it)
-- **Video:** `media/ebola-rising.mp4` (1600×900, 25 fps, 54 seconds)
-- **Story data:** `data/outbreaks.json`
+- **The story** (`docs/index.html`): a scroll story over real satellite imagery. A 3D map stays on screen while short chapters scroll past; the camera flies to each country, outlines its border, then moves in to the affected province or district. Spikes rise with confirmed cases and turn grey when an outbreak is declared over. It ends by pulling back over the whole continent on NASA Blue Marble, with a dotted line joining each outbreak in the order it began, then fades to NASA Black Marble at night.
+- **The dashboard** (`docs/dashboard.html`): filter every outbreak since 2014 by period, country, virus and status, with the 2026 growth curve, a dot map of Africa and a searchable table.
+- **The film** (`docs/film.html`, and `media/ebola-across-africa.mp4` for slides and social media).
 
-## What the film shows
+Live at **https://kinjuriu.github.io/TrackingEbolaAcrossSSA/** once GitHub Pages is turned on (Settings → Pages → Deploy from a branch → `main` / `docs`).
 
-| Chapter | Outbreak | Confirmed cases | Deaths |
-|---|---|---|---|
-| 2014–2016 | West Africa (Guinea, Liberia, Sierra Leone) | 28,616 | 11,310 |
-| 2018–2020 | Eastern DRC (North Kivu and Ituri) | 3,470 | 2,287 |
-| 2022 | Mubende, Uganda (Sudan virus) | 164 | 77 |
-| 2025 | Bulape, Kasaï, DRC | 64 | 45 |
-| 2026 | DRC, Uganda and Kenya (Bundibugyo virus), data to 14 to 16 Oct 2026 | DRC 9,277 · Uganda 20 · Kenya 3 | DRC 4,478 · Uganda 2 · Kenya 1 |
+## What the story shows
 
-Spike height is proportional to confirmed cases on one scale for the whole film, so 2014 towers over everything and Kenya's three cases barely leave the ground. The 2026 spikes sit on one town per affected province, because province totals were the finest level I could find. Totals come from reporting dates; between those dates the curve, and each province's share of it, is interpolated. Figures for 2026 are provisional.
+| Chapter | Place | Virus | Confirmed cases | Deaths | Status |
+|---|---|---|---|---|---|
+| 2014–2016 | Sierra Leone (national total) | Zaire ebolavirus | 14,124 | 3,956 | Over, 17 March 2016 |
+| 2014–2016 | Liberia (national total) | Zaire ebolavirus | 10,678 | 4,810 | Over, 9 June 2016 |
+| 2014–2016 | Guinea (national total, began in Guéckédou) | Zaire ebolavirus | 3,814 | 2,544 | Over, 1 June 2016 |
+| 2018–2020 | North Kivu & Ituri provinces, DR Congo | Zaire ebolavirus | 3,470 | 2,287 | Over, 25 June 2020 |
+| 2022 | Mubende District, Central Region, Uganda | Sudan virus | 164 | 77 | Over, 11 January 2023 |
+| 2025 | Kampala, Central Region, Uganda | Sudan virus | 14 | 4 | Over, 26 April 2025 |
+| 2025 | Bulape, Kasaï Province, DR Congo | Zaire ebolavirus | 64 | 45 | Over, December 2025 |
+| 2026 | Seven DR Congo provinces (Ituri 6,806; North Kivu 1,991; Haut-Uélé 398; Tshopo 64; Bas-Uélé 13; South Kivu 3; Sud-Ubangi 2) | Bundibugyo virus | 9,277 | 4,478 | Active (data to 14 Oct 2026) |
+| 2026 | Uganda | Bundibugyo virus | 20 | 2 | Over, August 2026 |
+| 2026 | Nairobi County, Kenya | Bundibugyo virus | 3 | 1 | Active (16 Oct 2026) |
+
+**How to read it.** West African spikes are national totals, one per country; 2026 spikes are province totals placed on each province's main town. Spike height is proportional to confirmed cases; in the two whole-continent chapters heights follow the square root of cases so small outbreaks stay visible. Between reporting dates, the 2026 curve and each province's share of it are interpolated. Most outbreaks were separate jumps from animals to people; the dotted line on the continent shows the order they began, not a chain of infection. Only the 2026 route from eastern DR Congo through Uganda to Nairobi, taken from the WHO Kenya week 41 report, was one chain. Ebola is never eradicated, because the virus survives in animals; WHO declares an outbreak over after 42 days with no new cases.
+
+2026 figures are confirmed cases and provisional. Earlier outbreaks show final totals, which for 2014–16, 2018–20 and 2022 include probable cases.
 
 ## How it was built
 
-1. **Imagery and elevation.** Free map tiles were fetched in the browser and stitched into mosaics (`scripts/fetch_tiles_in_browser.js`): Sentinel-2 cloudless 2016 for colour, and Terrain Tiles on AWS for elevation. Sharper tiles cover the three places the camera zooms into: eastern DRC to Nairobi, Kasaï, and West Africa.
-2. **Terrain baking.** `scripts/terrain2.py` reprojects the tiles to a flat latitude/longitude grid, shades relief from the elevation, draws lakes and coastlines from Natural Earth, and cuts the result into 32 texture chunks plus a height grid (`data/terrain/`).
-3. **Map layers.** `scripts/vectors2.py` simplifies rivers, borders and province outlines: Natural Earth for rivers, lakes and countries, and geoBoundaries for the current 26 DRC provinces, Ugandan regions and Nairobi County.
-4. **The page.** `scripts/rising2_template.html` is the three.js scene (terrain chunks, draped borders, glowing spikes, a scripted camera and a locator map). `scripts/build_rising.py` holds the story data and `scripts/build_rising2.py` puts everything into one self-contained HTML file.
-5. **The video.** `scripts/video.py` steps through the film frame by frame in headless Chromium and encodes it with ffmpeg.
+1. **Free imagery and elevation**, fetched in the browser and stitched into mosaics (`scripts/fetch_tiles_in_browser.js`): Sentinel-2 cloudless 2024 for the sharp ground, NASA Blue Marble Next Generation and VIIRS Black Marble for the whole continent, and AWS Terrain Tiles for relief.
+2. **Terrain baking** (`scripts/terrain3.py`, `scripts/continent3.py`): reprojected to a latitude/longitude grid, natural colour, hillshade from elevation, water from Natural Earth, cut into texture chunks (`data/terrain/`, `data/continent/`).
+3. **Map layers** (`scripts/vectors3.py`): rivers and country borders from Natural Earth; current DR Congo provinces, Ugandan regions and Nairobi County from geoBoundaries.
+4. **The story page** (`scripts/scroll_template.html`, `scripts/build_scroll.py`): a three.js scene with draped borders, glowing spikes, a scripted camera, a locator map and the travel route, driven by scroll position. The builder holds the story data and puts everything into one self-contained HTML file.
+5. **The dashboard** (`docs/dashboard.html`): d3, with the data in `data/outbreaks.json`, `data/timeline_2026.json` and `data/africa_grid.json`. Palette picked from NASA Earthdata.
+6. **The video** (`scripts/video_scroll.py`): steps through the story frame by frame in headless Chromium and encodes it with ffmpeg.
 
-The annotations follow the field-guide look of the documentary *How to Live on Earth*: Fira Sans for labels, Sacramento for the handwritten notes, and dotted leader lines with small open circles.
+Annotations follow the field-guide look of the documentary *How to Live on Earth*: Fira Sans labels, Sacramento handwriting and dotted leader lines.
 
-The scripts were written for one working session and use absolute paths; change the paths at the top of each script before running them yourself. The raw tile mosaics (about 70 MB) are not in the repo; re-create them with the browser script.
+The scripts were written for one working session and use absolute paths; change the paths at the top of each before running them yourself. Raw tile mosaics are not in the repo; re-create them with the browser script.
 
 ## Sources
 
 **Case data**
-- ECDC, Ebola outbreak in DRC and Uganda: DRC confirmed cases and deaths by province, data to 14 Oct 2026. https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda
-- WHO Disease Outbreak News and WHO African Region situation reports: 2026 milestones, May to October. https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615
-- Al Jazeera and AP: Kenya, 3 cases and 1 death by 16 Oct 2026. https://www.aljazeera.com/news/2026/10/16/kenya-reports-third-bundibugyo-strain-ebola-case
-- US CDC outbreak history: 2014–16 West Africa, 2018–20 DRC, 2022 Uganda. https://www.cdc.gov/ebola/outbreaks
-- WHO via allAfrica: 2025 Kasaï outbreak, 64 cases and 45 deaths. https://allafrica.com/stories/202512020161.html
+- ECDC, Ebola outbreak in DRC and Uganda: confirmed cases and deaths by province, data to 14 Oct 2026. https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda
+- WHO Disease Outbreak News, and WHO Africa weekly situation reports 21 and 22 (data to 4 and 11 Oct 2026). https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615
+- WHO Kenya Emergency Preparedness and Response weekly situation report, week 41 (5–16 Oct 2026): the Kenyan case's travel route.
+- Al Jazeera, Kenya's third case, 16 Oct 2026. https://www.aljazeera.com/news/2026/10/16/kenya-reports-third-bundibugyo-strain-ebola-case
+- US CDC outbreak history. https://www.cdc.gov/ebola/outbreaks
+- WHO statements on the end of transmission in Sierra Leone (17 Mar 2016), Guinea (1 Jun 2016) and Liberia (9 Jun 2016). https://www.who.int/en/news-room/detail/17-03-2016-who-statement-on-end-of-ebola-flare-up-in-sierra-leone · https://www.afro.who.int/news/end-ebola-transmission-guinea · https://afro.who.int/news/who-declares-end-most-recent-ebola-virus-disease-outbreak-liberia
+- ECDC, Uganda 2022–23; WHO via ReliefWeb, Uganda 2025. https://www.ecdc.europa.eu/en/news-events/ebola-outbreak-uganda · https://reliefweb.int/report/uganda/disease-outbreak-news-sudan-virus-disease-uganda-26-april-2025
+- WHO via allAfrica, Kasaï 2025. https://allafrica.com/stories/202512020161.html
 
 **Map data (all free)**
-- Sentinel-2 cloudless 2016 by EOX IT Services GmbH, contains modified Copernicus Sentinel data 2016 & 2017, CC BY 4.0. https://s2maps.eu
-- Terrain Tiles on AWS (Mapzen/Tilezen; sources include SRTM and ETOPO1). https://registry.opendata.aws/terrain-tiles/
-- Natural Earth, public domain. https://www.naturalearthdata.com/
-- geoBoundaries, CC BY 4.0. https://www.geoboundaries.org/
+- Sentinel-2 cloudless 2024 by EOX IT Services GmbH, contains modified Copernicus Sentinel data, CC BY-NC-SA 4.0. https://s2maps.eu
+- NASA Blue Marble Next Generation and VIIRS Black Marble, via NASA GIBS. https://earthdata.nasa.gov/gibs
+- Terrain Tiles on AWS. https://registry.opendata.aws/terrain-tiles/
+- Natural Earth (public domain) and geoBoundaries (CC BY 4.0).
+
+Non-commercial use only, because of the Sentinel-2 2024 licence.
 
 ## Credit
 
