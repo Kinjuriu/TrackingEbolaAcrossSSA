@@ -1,3 +1,4 @@
 raw_tiles/
 render/frames/
 __pycache__/
+.DS_Store
