@@ -32,14 +32,14 @@ Z, SU, BU = "Zaire ebolavirus", "Sudan virus", "Bundibugyo virus"
 def sp(id, label, lon, lat, keys, deaths, virus, ease=True, overT=None, overText="", kind="", side="right", dy=0):
     return dict(id=id, label=label, lon=lon, lat=lat, keys=keys, deaths=deaths, virus=virus, ease=ease, overT=overT, overText=overText, kind=kind, side=side, dy=dy)
 spikes = [
-  sp("sle","Sierra Leone",-11.8,8.5,[[1.0,0],[2.2,14124]],3956,Z,overT=5.2,overText="17 March 2016",kind="national total",side="left",dy=30),
-  sp("lbr","Liberia",-9.4,6.5,[[2.8,0],[3.9,10678]],4810,Z,overT=5.4,overText="9 June 2016",kind="national total",dy=64),
-  sp("gin","Guinea",-10.1,8.6,[[2.8,0],[3.9,3814]],2544,Z,overT=5.3,overText="1 June 2016",kind="national total",dy=-46),
+  sp("sle","Sierra Leone",-11.8,8.5,[[1.0,0],[2.2,14124]],3956,Z,overT=5.2,overText="March 17, 2016",kind="national total",side="left",dy=30),
+  sp("lbr","Liberia",-9.4,6.5,[[2.8,0],[3.9,10678]],4810,Z,overT=5.4,overText="June 9, 2016",kind="national total",dy=64),
+  sp("gin","Guinea",-10.1,8.6,[[2.8,0],[3.9,3814]],2544,Z,overT=5.3,overText="June 1, 2016",kind="national total",dy=-46),
   sp("nga","Nigeria",3.39,6.52,[[3.0,0],[3.6,20]],8,Z,overT=5.3),
   sp("mli","Mali",-8.0,12.64,[[3.0,0],[3.6,8]],6,Z,overT=5.3),
-  sp("beni","North Kivu & Ituri provinces, DR Congo",29.47,0.49,[[8.8,0],[10.0,3470]],2287,Z,overT=11.0,overText="25 June 2020"),
-  sp("mub","Mubende District, Central Region, Uganda",31.39,0.56,[[11.9,0],[12.6,164]],77,SU,overT=13.6,overText="11 Jan. 2023",side="left"),
-  sp("kla25","Kampala, Central Region, Uganda",32.58,0.31,[[12.6,0],[13.1,14]],4,SU,overT=13.8,overText="26 April 2025",dy=40),
+  sp("beni","North Kivu & Ituri provinces, DR Congo",29.47,0.49,[[8.8,0],[10.0,3470]],2287,Z,overT=11.0,overText="June 25, 2020"),
+  sp("mub","Mubende District, Central Region, Uganda",31.39,0.56,[[11.9,0],[12.6,164]],77,SU,overT=13.6,overText="Jan. 11, 2023",side="left"),
+  sp("kla25","Kampala, Central Region, Uganda",32.58,0.31,[[12.6,0],[13.1,14]],4,SU,overT=13.8,overText="April 26, 2025",dy=40),
   sp("kas","Bulape, Kasäi Province, DR Congo".replace("ä","ä").replace("ä","aï")[:0] or "Bulape, Kasïi Province, DR Congo",21.8,-4.6,[[14.4,0],[15.0,64]],45,Z,overT=15.9,overText="Dec. 2025"),
 ]
 spikes[-1]["label"] = "Bulape, Kasaï Province, DR Congo"
@@ -55,13 +55,13 @@ spikes.append(sp("nbo","Nairobi County, Kenya",36.82,-1.29,[[25.6,0],[25.8,1],[2
 END = 32.4
 WA = ["Sierra Leone","Liberia","Guinea"]; DRC = "Democratic Republic of the Congo"
 phases = [
-  {"t0":0,"t1":7.2,"date":"2014–2016 · West Africa","ids":["sle","lbr","gin"],"loc":WA},
-  {"t0":7.2,"t1":11.4,"date":"2018–2020 · DR Congo","ids":["beni"],"loc":[DRC]},
-  {"t0":11.4,"t1":14.0,"date":"2022 & 2025 · Uganda","ids":["mub","kla25"],"loc":["Uganda"]},
+  {"t0":0,"t1":7.2,"date":"2014 to 2016 · West Africa","ids":["sle","lbr","gin"],"loc":WA},
+  {"t0":7.2,"t1":11.4,"date":"2018 to 2020 · DR Congo","ids":["beni"],"loc":[DRC]},
+  {"t0":11.4,"t1":14.0,"date":"2022 and 2025 · Uganda","ids":["mub","kla25"],"loc":["Uganda"]},
   {"t0":14.0,"t1":16.4,"date":"2025 · DR Congo","ids":["kas"],"loc":[DRC]},
   {"t0":16.4,"t1":24.8,"kind":"2026","loc":[DRC,"Uganda"]},
   {"t0":24.8,"t1":28.2,"kind":"2026","loc":[DRC,"Uganda","Kenya"]},
-  {"t0":28.2,"t1":END+5,"date":"2014–2026 · every outbreak on this map","ids":"all","loc":[]},
+  {"t0":28.2,"t1":END+5,"date":"2014 to 2026 · every outbreak on this map","ids":"all","loc":[]},
 ]
 O = []
 def ol(key, t0, t1, color="active"): O.append({"key":key,"t0":t0,"t1":t1,"color":color})
@@ -133,39 +133,40 @@ DATA = dict(
 
 def tags(*v): return "".join(f'<span class="tag {c}">{t}</span>' for c, t in v)
 TZ, TS, TB = ("z", "Zaire ebolavirus"), ("s", "Sudan virus"), ("b", "Bundibugyo virus")
+ARROW = '<svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true"><path d="M7 1v19M1.5 14.5 7 20l5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
 steps = [
- (0, "hero", "Ebola in Africa · 2014–2026", "<h1>How Ebola moved across Africa</h1>",
-  '<span class="hand">from Sierra Leone to Nairobi</span><p>Twelve years of outbreaks, told place by place. Each spike rises with confirmed cases; grey spikes are outbreaks that have been declared over.</p><p>' + tags(TZ, TS, TB) + '</p><div class="scrollcue">Scroll to begin</div>'),
- (2, "", "2014 · West Africa", "<h2>Sierra Leone</h2>",
-  "<p>The largest Ebola epidemic ever recorded reached Sierra Leone in 2014. By the end it had <b>14,124 cases</b> and <b>3,956 deaths</b>, more than any other country.</p><p>" + tags(TZ) + "</p>"),
- (4, "", "2014–2016 · three countries", "<h2>Three spikes, three countries</h2>",
-  "<p>Each spike here is one country&rsquo;s <b>national total</b>, not a province: Sierra Leone, <b>Liberia</b> with 10,678 cases, and <b>Guinea</b> with 3,814, where the epidemic began, around Guéckédou.</p><p>Together: <b>28,616 cases</b> and <b>11,310 deaths</b>.</p>"),
- (6, "", "2016", "<h2>Declared over</h2>",
-  "<p>WHO declared Sierra Leone&rsquo;s last flare-up over on <b>17 March 2016</b>, Guinea on <b>1 June 2016</b> and Liberia on <b>9 June 2016</b>. The spikes turn grey.</p><p>Ebola is never eradicated, because the virus survives in animals. An outbreak is declared over after 42 days with no new cases.</p>"),
- (8, "", "2018 · DR Congo", "<h2>Four years later, eastern Congo</h2>",
-  "<p>In August 2018 Ebola appeared again, in the far east of the Democratic Republic of the Congo, a country of 26 provinces.</p>"),
- (10, "", "2018–2020 · DR Congo", "<h2>North Kivu and Ituri provinces</h2>",
-  "<p><b>3,470 cases</b> and <b>2,287 deaths</b> in a conflict zone, across North Kivu, Ituri and South Kivu. It was declared over on <b>25 June 2020</b>.</p><p>" + tags(TZ) + "</p>"),
- (12.5, "", "2022 & 2025 · Uganda", "<h2>Central Region, Uganda</h2>",
-  "<p>A different virus. Sudan virus caused <b>164 cases</b> in Mubende District in 2022, declared over on 11 January 2023, and <b>14 cases</b> in Kampala in 2025, declared over on 26 April 2025.</p><p>There is no licensed vaccine for Sudan virus.</p><p>" + tags(TS) + "</p>"),
- (15, "", "2025 · DR Congo", "<h2>Kasaï Province, south-central DRC</h2>",
-  "<p>A separate spillover, far from the east: <b>64 cases</b> and <b>45 deaths</b> around Bulape. It was declared over in December 2025.</p><p>" + tags(TZ) + "</p>"),
- (17.6, "", "May 2026 · DR Congo", "<h2>Ituri Province, with a new virus</h2>",
-  "<p>On 15 May 2026, DR Congo confirmed an outbreak of <b>Bundibugyo virus</b> in Ituri Province. It had probably been spreading for weeks before anyone detected it, and there is no approved vaccine for it.</p><p>" + tags(TB) + "</p>"),
- (20.5, "", "August 2026", "<h2>The second largest on record</h2>",
-  "<p>By 12 August there were <b>4,665 confirmed cases</b>, 85% of them in Ituri. The outbreak had passed the entire 2018&ndash;20 epidemic in about eleven weeks.</p>"),
- (22.2, "", "October 2026 · DR Congo", "<h2>Seven provinces, 9,277 cases</h2>",
-  "<p>By 14 October: Ituri <b>6,806</b>, North Kivu <b>1,991</b>, Haut-Uélé <b>398</b>, Tshopo <b>64</b>, Bas-Uélé <b>13</b>, South Kivu <b>3</b> and Sud-Ubangi <b>2</b>.</p><p>Nearly half of confirmed cases have died.</p>"),
- (24, "", "2026 · Uganda", "<h2>Uganda contained its cases</h2>",
-  "<p>Uganda recorded <b>20 confirmed cases</b> linked to Congo and declared its outbreak over in August 2026.</p><p>" + tags(TB) + "</p>"),
- (26.2, "", "October 2026 · Kenya", "<h2>Nairobi County, Kenya</h2>",
-  "<p>A Kenyan man travelled from Buta in Bas-Uélé through Kisangani and Beni, crossed into Uganda at Mpondwe, and flew from Entebbe to Nairobi on 3 October. He died on 5 October.</p><p>By 16 October Kenya had confirmed <b>3 cases</b>, all linked to him.</p><p>" + tags(TB) + "</p>"),
- (29.6, "", "2014–2026", "<h2>Ebola&rsquo;s march east</h2>",
-  "<p>Pulled back over the whole continent, the pattern is clear. West Africa&rsquo;s epidemic is over and Uganda&rsquo;s outbreaks are over; eastern Congo is still active, now with a link to Nairobi.</p><p>The dotted line joins each outbreak in the order it began, from Gu\u00e9ck\u00e9dou in 2014 to Nairobi in 2026. Most were separate jumps from animals to people; only the 2026 path to Nairobi was one chain of infection.</p><p>At this scale spike heights follow the square root of cases.</p>"),
- (END, "", "Africa at night", "<h2>Where people are connected</h2>",
-  '<p>NASA&rsquo;s Black Marble shows Africa&rsquo;s lights at night: the cities and transport links that carried this virus from eastern Congo to Nairobi in two days.</p><span class="hand">every spike is a community</span>'),
+ (0, "hero", "", "<h1>Ebola in Africa: 2014 to 2026</h1>",
+  "<p>This data tracks the spread of Ebola across the African continent from Sierra Leone to Nairobi over a 12-year period. The map visualizes outbreaks place by place. Active outbreaks are marked by rising spikes that correspond to confirmed cases of the Zaire, Sudan, and Bundibugyo strains. Spikes turn grey when an outbreak is officially declared over.</p><p>" + tags(TZ, TS, TB) + '</p><div class="scrollcue">Scroll to begin' + ARROW + '</div>'),
+ (2, "", "2014", "<h2>West Africa Epidemic</h2>",
+  "<p>The largest Ebola epidemic on record reached Sierra Leone in 2014. Driven by the Zaire ebolavirus, the country recorded <b>14,124 cases</b> and <b>3,956 deaths</b>. This marked the highest toll of any single nation during the crisis.</p><p>" + tags(TZ) + "</p>"),
+ (4, "", "2014 to 2016", "<h2>The Regional Toll</h2>",
+  "<p>The epidemic originated near Guéckédou, Guinea, and rapidly escalated into a national crisis across three neighboring countries. The data visualizes the national totals rather than provincial numbers. Guinea reported <b>3,814 cases</b> and Liberia reported <b>10,678 cases</b>. Combined with Sierra Leone, the regional outbreak resulted in a total of <b>28,616 cases</b> and <b>11,310 deaths</b>.</p>"),
+ (6, "", "2016", "<h2>Outbreaks Contained</h2>",
+  "<p>The World Health Organization declared the final flare-up over in Sierra Leone on <b>March 17, 2016</b>. Guinea followed on <b>June 1</b>, and Liberia on <b>June 9</b>, at which point the map spikes turn grey.</p><p>Health officials declare an outbreak over only after 42 consecutive days pass with no new cases. However, the virus is never fully eradicated because it remains endemic in animal populations.</p>"),
+ (8, "", "2018 · Democratic Republic of the Congo", "<h2>Resurgence in the East</h2>",
+  "<p>Four years after the West African epidemic, the virus resurfaced in August 2018. This new outbreak emerged in the far eastern region of the Democratic Republic of the Congo, a vast nation divided into 26 provinces.</p>"),
+ (10, "", "2018 to 2020", "<h2>DR Congo Conflict Zone</h2>",
+  "<p>The Zaire ebolavirus spread across North Kivu, Ituri, and South Kivu provinces. Operating within an active conflict zone, health workers recorded <b>3,470 cases</b> and <b>2,287 deaths</b>. The outbreak was officially declared over on <b>June 25, 2020</b>.</p><p>" + tags(TZ) + "</p>"),
+ (12.5, "", "2022 and 2025", "<h2>Uganda Outbreaks</h2>",
+  "<p>Uganda faced outbreaks of the Sudan virus, a strain for which there is currently no licensed vaccine. In 2022, the virus caused <b>164 cases</b> in the Mubende District, with the outbreak declared over on January 11, 2023. A subsequent outbreak in Kampala caused <b>14 cases</b> in 2025 and was declared over on April 26, 2025.</p><p>" + tags(TS) + "</p>"),
+ (15, "", "2025", "<h2>South-Central DR Congo</h2>",
+  "<p>A separate spillover event of the Zaire ebolavirus occurred in the Kasaï Province, distant from the eastern outbreaks. Centered around Bulape, this outbreak resulted in <b>64 cases</b> and <b>45 deaths</b> before being declared over in December 2025.</p><p>" + tags(TZ) + "</p>"),
+ (17.6, "", "May 2026", "<h2>A New Strain in DR Congo</h2>",
+  "<p>On May 15, 2026, health officials in DR Congo confirmed an outbreak of the <b>Bundibugyo virus</b> in Ituri Province. Epidemiological data suggests the virus had been circulating undetected for several weeks. There is currently no approved vaccine for the Bundibugyo strain.</p><p>" + tags(TB) + "</p>"),
+ (20.5, "", "August 2026", "<h2>Rapid Escalation</h2>",
+  "<p>By August 12, the Bundibugyo outbreak reached <b>4,665 confirmed cases</b>, with 85 percent concentrated in Ituri. In approximately eleven weeks, the case count surpassed the total number of infections from the entire 2018 to 2020 epidemic, making it the second-largest Ebola outbreak on record.</p>"),
+ (22.2, "", "October 2026", "<h2>Expansion Across Seven Provinces</h2>",
+  "<p>By October 14, the DR Congo outbreak expanded to seven provinces, totaling <b>9,277 cases</b>. The distribution included 6,806 cases in Ituri, 1,991 in North Kivu, 398 in Haut-Uélé, 64 in Tshopo, 13 in Bas-Uélé, three in South Kivu, and two in Sud-Ubangi.</p><p>The fatality rate remained at nearly 50 percent of all confirmed cases.</p>"),
+ (24, "", "2026", "<h2>Uganda Containment</h2>",
+  "<p>Uganda recorded <b>20 confirmed cases</b> of the Bundibugyo virus linked to the outbreak in neighboring DR Congo. Health authorities contained the spread and officially declared the Ugandan outbreak over in August 2026.</p><p>" + tags(TB) + "</p>"),
+ (26.2, "", "October 2026", "<h2>Nairobi, Kenya</h2>",
+  "<p>On October 3, a Kenyan national flew from Entebbe, Uganda, to Nairobi. The patient&rsquo;s travel history included transit from Buta in Bas-Uélé through Kisangani and Beni in DR Congo, before crossing the Ugandan border at Mpondwe. The patient died on October 5.</p><p>By October 16, Kenyan health officials confirmed <b>three cases</b> of the Bundibugyo virus, all directly linked to this initial patient.</p><p>" + tags(TB) + "</p>"),
+ (29.6, "", "2014 to 2026", "<h2>Continental Overview</h2>",
+  "<p>Viewing the continent as a whole shows a clear eastward progression of active outbreaks. While the West African and Ugandan epidemics are resolved, the eastern DR Congo outbreak remains active, with a direct transmission link to Nairobi.</p><p>A dotted line connects each outbreak geographically in chronological order, from Guéckédou in 2014 to Nairobi in 2026. Most map points represent separate zoonotic transmission events from animals to humans; however, the 2026 path to Nairobi represents a single, continuous chain of human infection.</p><p>At this map scale, spike heights are calculated using the square root of total cases.</p>"),
+ (END, "", "Africa at night", "<h2>Infrastructure and Transmission</h2>",
+  "<p>NASA&rsquo;s Black Marble satellite imagery illuminates Africa&rsquo;s active urban centers and transportation networks at night. These connected transit routes facilitated the movement of the virus from eastern DR Congo to Nairobi in two days.</p><p>Behind the data, every spike on the map represents an impacted community.</p>"),
 ]
-step_html = "\n".join(f'    <section class="step{(" "+cls) if cls else ""}" data-t="{t}"><div class="card{(" "+cls) if cls else ""}"><p class="k">{k}</p>{h}{body}</div></section>' for t, cls, k, h, body in steps)
+step_html = "\n".join(f'    <section class="step{(" "+cls) if cls else ""}" data-t="{t}"><div class="card{(" "+cls) if cls else ""}">{f'<p class="k">{k}</p>' if k else ""}{h}{body}</div></section>' for t, cls, k, h, body in steps)
 src = [
  ('https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda', 'ECDC', 'DRC cases and deaths by province, data to 14 Oct 2026'),
  ('https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615', 'WHO Disease Outbreak News', 'and WHO Africa weekly situation reports 21 and 22: 2026 milestones'),
@@ -183,7 +184,7 @@ src_html = "\n".join(f'        <li><a href="{u}" target="_blank" rel="noopener">
 files = [c["f"] for c in dims["chunks"]] + ["bluemarble.jpg", "blackmarble.jpg"]
 texmap = {f: "data:image/jpeg;base64," + base64.b64encode(open(f"{T3}/{f}", "rb").read()).decode() for f in files}
 html = open("/home/claude/scroll_template.html").read()
-html = html.replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
+html = html.replace("__DASHBAND__", open("/home/claude/dashband_clean.html").read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
 html = html.replace("__DATA__", json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))).replace("__TEXMAP__", json.dumps(texmap, separators=(",", ":")))
 open("/home/claude/ebola-scroll.html", "w").write(html)
 print("ebola-scroll.html", len(html)//1024, "KB")

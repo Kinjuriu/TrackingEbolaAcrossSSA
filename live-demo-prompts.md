@@ -2,7 +2,7 @@
 
 **Where:** VS Code, with the Claude Code extension, in the `TrackingEbolaAcrossSSA` repo.
 **Model:** Claude Opus 5.5.
-**What gets built live:** a smaller version of `docs/dashboard.html`, in a new `demo/` folder, from the data already in `data/`.
+**What gets built live:** a smaller version of `docs/dashboard.html` and a light scrolling story, in a new `demo/` folder, from the data already in `data/`.
 **Total run time:** about 15 to 20 minutes of prompting, spread across the talk. Each batch is sized to finish in 1 to 4 minutes, so you can talk while it works.
 
 ---
@@ -23,14 +23,14 @@
    Then reset for the real talk with `git checkout main && git branch -D live-demo` and recreate the branch.
 3. **Your safety net:** if a batch fails on stage, run `git checkout demo-N -- demo/` to jump to the dry-run result for that step, and keep talking. The finished dashboard is always at `docs/dashboard.html`.
 4. **Open a live preview:** in VS Code, install "Live Server" (or run `python3 -m http.server` in the repo) and keep `demo/index.html` open in a browser next to the editor.
-5. **Pick your effort level:** set Claude Code to **medium**, which is Opus 5.5's default. Batch 1 and the effort comparison in Batch 7 change it on purpose.
+5. **Pick your effort level:** set Claude Code to **medium**, which is Opus 5.5's default. Batches 5 and 7 use high, because maps and the story need more planning.
 6. **Check your connection:** run Batch 1 once on the venue Wi-Fi. If the network is unreliable, use your phone's hotspot.
 
 ---
 
 ## Batch 1 · Read before building (effort: low) · about 1 minute
 
-> **Say while it runs:** "Before an LLM writes a single line, it reads. Everything it knows about this project right now is whatever fits in its context window."
+> **Say while it runs:** "This is the scoping step from the slides. Before it writes anything, it reads the data and proposes a plan, and I get to say no."
 
 ```
 You're helping me build a small public-health dashboard live, in front of an audience, so keep each step quick and visible.
@@ -88,7 +88,7 @@ Compute every number from the data. Do not type any figure into the HTML. Format
 
 ## Batch 4 · The growth chart (effort: medium) · about 2 to 3 minutes
 
-> **Say while it runs:** "Charts are just code. D3 is all over its training data, so it knows the patterns: scales, axes, a line, then the details that make a chart readable."
+> **Say while it runs:** "I'm describing the chart the way I'd brief a designer: what goes on each axis, the colours, and what happens on hover."
 
 ```
 Add a card titled "2026 outbreak over time" with a d3 line chart from timeline_2026.json:
@@ -105,7 +105,7 @@ Size the chart from the card's width and redraw it when the window resizes. Fain
 
 ## Batch 5 · The map (effort: high) · about 3 to 4 minutes
 
-> **Say while it runs:** "Maps are harder. It has to turn latitude and longitude into pixels and keep the layers in the right order. That's why I've turned effort up: more thinking before it writes."
+> **Say while it runs:** "Maps are harder. It has to turn latitude and longitude into pixels and keep the layers in the right order. That's why I've turned effort up for this one."
 
 ```
 Add a "Where" card next to the growth chart, two columns on wide screens.
@@ -146,20 +146,22 @@ The table, "Outbreak locations", has these columns: location, country, period, v
 
 ---
 
-## Batch 7 · The effort comparison (on stage) · about 2 minutes
+## Batch 7 · Turn it into a story (effort: high) · about 4 to 6 minutes
 
-> **Say:** "Same prompt, two effort levels. Watch how long it thinks, how many steps it takes and what comes out."
-
-Run this once at **low**, then undo it (`git checkout -- demo/`), then run it again at **high**.
+> **Say while it runs:** "A dashboard lets people explore. A story walks them through it in order. Same data, different job."
 
 ```
-Add a small "What changed this week" card at the top that compares the latest two rows of timeline_2026.json: new cases, new deaths, and the change in case fatality, each with a short plain-English sentence.
+Create demo/story.html: a scrolling data story about Ebola in Africa from 2014 to 2026, using data/outbreaks.json and data/africa_grid.json.
+
+- Left column: short text chapters, one per outbreak, in order of start date, from Sierra Leone in 2014 to Kenya in 2026. Each chapter shows the place, years, virus, cases, deaths and status.
+- Right column: a sticky d3 dot map of Africa, styled like the dashboard. As each chapter scrolls into view (use IntersectionObserver), the map zooms smoothly to that outbreak and highlights its circle.
+- Final chapter: zoom out to the whole continent and draw a dashed line joining the outbreaks in the order they began, with a note that most outbreaks were separate jumps from animals, not one chain.
+- Same fonts and colours as demo/index.html. Respect prefers-reduced-motion. Stack the columns on narrow screens.
+
+Add a big "Read the story" button at the bottom of demo/index.html that links to it.
 ```
 
-> **What to point out:**
-> - Low usually answers straight away, with fewer steps and less checking.
-> - High plans first, makes more tool calls, handles edge cases (for example a missing deaths value) and summarises what it changed.
-> - Neither is "better". You're choosing how much thinking, time and money the task deserves.
+> **If it runs long:** keep talking through the limitations slides, then open the finished story at kinjuriu.github.io/TrackingEbolaAcrossSSA.
 
 ---
 

@@ -9,7 +9,7 @@
 html,body{margin:0;background:#f1f5f9;color:#010134}
 body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
 .nav{max-width:1440px;margin:0 auto 10px;display:flex;gap:16px;font:12px "IBM Plex Mono",ui-monospace,Menlo,monospace}
-.nav a{color:#0461da;text-decoration:none}.nav a:hover{text-decoration:underline}
+.nav a{color:#0461da;text-decoration:underline;text-underline-offset:2px}
 .dash-skeleton{color:transparent!important}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
@@ -42,29 +42,14 @@ body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(
   --type:"IBM Plex Mono","Courier Prime",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
   --text:"IBM Plex Sans",var(--font-anthropic-sans),"Helvetica Neue",Arial,sans-serif;
   color-scheme:light;background:var(--bg);color:var(--ink);font-family:var(--text);font-size:13.5px;line-height:1.5;
-  border:1px solid var(--line);border-radius:10px;display:grid;grid-template-columns:188px minmax(0,1fr);overflow:hidden;max-width:1440px;margin-inline:auto}
+  border:1px solid var(--line);border-radius:10px;display:block;overflow:hidden;max-width:1440px;margin-inline:auto}
 
 .sg *{box-sizing:border-box}
-.sg-side{border-right:1px solid var(--line);background:#f8fafc;padding:18px 12px;display:flex;flex-direction:column;gap:4px}
-.sg-logo{font-family:var(--type);font-size:12px;letter-spacing:.02em;color:var(--ink);padding:0 8px 16px}
-.sg-logo b{color:var(--blue);font-weight:600}
-.sg-nav{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:13px}
-.sg-nav:hover{background:#eef3f8;color:var(--ink)}
-.sg-nav.on{background:#e8f0fb;color:var(--ink)}
-.sg-nav i{width:14px;height:14px;border:1.5px solid currentColor;border-radius:3px;display:inline-block;opacity:.7}
-.sg-sep{height:1px;background:var(--line);margin:10px 4px}
-.sg-upd{margin-top:auto;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px;font-size:11.5px;color:var(--muted);line-height:1.45}
-.sg-upd b{display:block;font-family:var(--type);font-weight:500;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
-.sg-side{}
-@media (max-width:860px){.sg{grid-template-columns:1fr}.sg .sg-side{display:none}}
-.sg-upd .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:6px;vertical-align:1px}
-
 .sg-main{padding:22px clamp(14px,2.4vw,30px) 28px;display:flex;flex-direction:column;gap:16px;min-width:0}
 .sg-h1{font-family:var(--type);font-weight:400;font-size:clamp(22px,2.6vw,28px);letter-spacing:.01em;margin:0}
 .sg-lede{color:var(--muted);margin:2px 0 0;max-width:92ch}
 .sg-lede b{color:var(--ink);font-weight:600}
-.sg-note{display:flex;gap:10px;align-items:flex-start;border:1px solid #cfe0f6;background:#f2f7fe;border-radius:8px;padding:9px 12px;font-size:12.5px;color:#123a6b}
-.sg-note::before{content:"i";flex:0 0 auto;width:16px;height:16px;border-radius:50%;border:1.3px solid var(--blue);color:var(--blue);font:600 10px/14px var(--text);text-align:center;margin-top:1px}
+.sg-note{border-left:3px solid var(--blue);background:#f2f7fe;padding:8px 12px;font-size:12.5px;color:#123a6b}
 
 .sg-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
 .sg-ct{font-size:16px;font-weight:500;margin:0;color:var(--ink)}
@@ -72,7 +57,6 @@ body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(
 .sg-lab{font-size:11px;font-weight:600;color:var(--ink);margin:0 0 6px}
 .sg-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .sg-chip{font:inherit;font-size:12px;color:#3b4b60;background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 9px;cursor:pointer;line-height:1.4}
-.sg-chip:hover{border-color:#c7d3e0;background:#f8fafc}
 .sg-chip[aria-pressed=true]{border-color:var(--teal);color:var(--teal);background:#eef5f7}
 .sg-chip .ap{font-size:9px;font-weight:700;letter-spacing:.06em;margin-left:6px;text-transform:uppercase}
 .sg-sel{font:inherit;font-size:12px;color:#3b4b60;background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 8px;cursor:pointer}
@@ -80,7 +64,6 @@ body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(
 .sg-fact{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
 .sg-btn{font:inherit;font-size:12px;font-weight:500;color:#fff;background:var(--teal);border:0;border-radius:6px;padding:6px 12px;cursor:pointer}
 .sg-clear{font:inherit;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);background:none;border:0;cursor:pointer}
-.sg-clear:hover{color:var(--ink)}
 .sg-count{color:var(--faint);font-size:12.5px}
 .sg button:focus-visible,.sg select:focus-visible,.sg input:focus-visible,.sg a:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 
@@ -91,8 +74,10 @@ body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(
 .sg-kv{display:grid;grid-template-columns:44% 56%;gap:7px 10px;font-size:12px}
 .sg-kv dt{color:#b7cdd6}
 .sg-kv dd{margin:0;color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
-.sg-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:12px}
-.sg-kpi{border:1px solid var(--line2);border-radius:8px;padding:12px 14px;background:#fff}
+.sg-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+@media (max-width:560px){.sg-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.sg-kpi:nth-child(3){border-left:0;padding-left:0}}
+.sg-kpi{padding:12px 14px 12px 0}
+.sg-kpi+.sg-kpi{padding-left:14px;border-left:1px solid var(--line2)}
 .sg-kh{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
 .sg-kv2{font-size:26px;font-weight:400;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin:2px 0}
 .sg-kd{font-size:11.5px;color:var(--muted)}
@@ -122,10 +107,9 @@ body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(
 .sg-table td{padding:10px 12px;border-bottom:1px solid var(--line2);white-space:nowrap}
 .sg-table td:first-child{font-weight:600}
 .sg-table tr[data-key]{cursor:pointer}
-.sg-table tbody tr:hover td{background:#f8fafc}
 .sg-table tbody tr.sel td{background:#eef4fd}
 .sg-num{text-align:right}
-.sg-pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:11px;border:1px solid}
+.sg-pill{display:inline-block;padding:1px 7px;border-radius:3px;font-size:11px;border:1px solid}
 .sg-pill.active{background:var(--royal);border-color:var(--royal);color:#fff}
 .sg-pill.over{background:#fff;border-color:#b9c9dc;color:var(--muted)}
 .sg-vir{font-size:11px;color:var(--ocean);background:#eaf3f8;border-radius:5px;padding:1px 7px}
@@ -139,29 +123,17 @@ body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(
 .sg-tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(1,1,52,.12);padding:6px 9px;font-size:11.5px;z-index:5;max-width:260px}
 .sg-tip .t{color:var(--muted);margin-bottom:2px}
 .sg-foot{font-size:11.5px;color:var(--faint);line-height:1.6}
-[data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
-@media (prefers-reduced-motion:no-preference){.sg-pulse{animation:sgpulse 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}}
-@keyframes sgpulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.6);opacity:0}}
+[data-dash-source-state=refreshing]{opacity:.5}
 </style>
 
 <div class="sg" id="sg">
-  <aside class="sg-side" aria-label="Sections">
-    <div class="sg-logo">ebola<b>_</b>monitor</div>
-    <a class="sg-nav on" href="#overview"><i></i>Overview</a>
-    <a class="sg-nav" href="#explore"><i></i>Explore data</a>
-    <a class="sg-nav" href="#where"><i></i>Map</a>
-    <a class="sg-nav" href="#outbreaks"><i></i>Outbreaks</a>
-    <div class="sg-sep"></div>
-    <a class="sg-nav" href="#sources"><i></i>Sources</a>
-    <div class="sg-upd"><b>Data status</b><span class="dot"></span>Updated as WHO publishes new situation reports. Latest: WHO Africa report 22 and ECDC, data to 14 Oct 2026.</div>
-  </aside>
 
   <main class="sg-main">
     <header id="overview">
       <h1 class="sg-h1">Ebola Outbreaks</h1>
       <p class="sg-lede">Every Ebola outbreak in sub-Saharan Africa since 2014. The 2026 Bundibugyo outbreak has <b data-source="timeline_2026" data-field="cases" data-where="day=2026-10-14">—</b> confirmed cases in DR Congo, the second largest on record, and Kenya has confirmed <b data-source="outbreaks" data-field="cases" data-where="id=ken26">—</b> cases.</p>
     </header>
-    <div class="sg-note">Data will be updated as the WHO shares new situation reports. 2026 figures are confirmed cases and are provisional.</div>
+    <div class="sg-note">Data will be updated as the WHO shares new situation reports. Latest: WHO Africa situation report 22 and ECDC, data to 14 October 2026. 2026 figures are confirmed cases and are provisional.</div>
 
     <section class="sg-card" id="explore" aria-label="Filters">
       <div class="sg-frow">
@@ -296,9 +268,6 @@ selC.addEventListener('change', () => dash.setParams({ country: selC.value }));
 selV.addEventListener('change', () => dash.setParams({ virus: selV.value }));
 q.addEventListener('input', () => dash.setParams({ q: q.value }));
 document.getElementById('reset').addEventListener('click', () => dash.resetParams());
-document.querySelectorAll('.sg-nav').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const t = document.getElementById(a.getAttribute('href').slice(1));
-  if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); dash.setLink(t.id); }
-  document.querySelectorAll('.sg-nav').forEach((x) => x.classList.toggle('on', x === a)); }));
 dash.onData(() => {
   const o = dash.data('outbreaks'), p = dash.params(); syncP(); syncS();
   const rows = o.status === 'ok' ? o.data : [];
@@ -343,9 +312,7 @@ dash.onData(() => {
   const tt = svg.append('g').selectAll('text').data(ticks).join('text').attr('x', 0).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('fill', '#97a6b8').attr('font-size', 11).text((d) => d3.format('~s')(d));
   const ml = d3.max(tt.nodes(), (n) => n.getComputedTextLength()) + 10, x = d3.scaleUtc([rows[0].day, rows[rows.length - 1].day], [ml, W - 8]);
   svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', ml).attr('x2', W - 8).attr('y1', (d) => y(d)).attr('y2', (d) => y(d)).attr('stroke', '#eef2f6');
-  const gid = 'sgg' + Math.round(Math.random() * 1e6), gr = svg.append('defs').append('linearGradient').attr('id', gid).attr('x1', 0).attr('x2', 0).attr('y1', 0).attr('y2', 1);
-  [[0, .22], [1, 0]].forEach(([o, a]) => gr.append('stop').attr('offset', o).attr('stop-color', '#0536cf').attr('stop-opacity', a));
-  svg.append('path').attr('d', d3.area().x((r) => x(r.day)).y0(H - 22).y1((r) => y(r.cases))(rows)).attr('fill', `url(#${gid})`);
+  svg.append('path').attr('d', d3.area().x((r) => x(r.day)).y0(H - 22).y1((r) => y(r.cases))(rows)).attr('fill', '#0536cf').attr('fill-opacity', 0.07);
   svg.append('path').attr('d', d3.line().x((r) => x(r.day)).y((r) => y(r.cases))(rows)).attr('fill', 'none').attr('stroke', '#0536cf').attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
   const dr = rows.filter((r) => r.deaths !== null);
   svg.append('path').attr('d', d3.line().x((r) => x(r.day)).y((r) => y(r.deaths))(dr)).attr('fill', 'none').attr('stroke', '#c9a46a').attr('stroke-width', 2).attr('stroke-linecap', 'round');
@@ -367,8 +334,6 @@ dash.onData(() => {
   svg.append('g').selectAll('circle').data(g.data).join('circle').attr('cx', (d) => x(Number(d.lon))).attr('cy', (d) => y(Number(d.lat))).attr('r', Math.max(1.1, (W / (L1 - L0)) * 0.3))
     .attr('fill', (d) => hot.has(d.country) ? '#0976a6' : '#7898bf').attr('fill-opacity', (d) => hot.has(d.country) ? 0.85 : 0.28);
   const rs = d3.scaleSqrt([0, d3.max(o.data, (r) => Number(r.cases))], [0, Math.min(34, W * 0.07)]), sites = sel.slice().sort((a, b) => Number(b.cases) - Number(a.cases));
-  const pulse = svg.append('g');
-  sites.filter((r) => r.status === 'Active').forEach((r) => pulse.append('circle').attr('class', 'sg-pulse').attr('cx', x(Number(r.lon))).attr('cy', y(Number(r.lat))).attr('r', Math.max(3, rs(Number(r.cases)))).attr('fill', 'none').attr('stroke', '#0536cf'));
   svg.append('g').selectAll('circle').data(sites).join('circle').attr('cx', (r) => x(Number(r.lon))).attr('cy', (r) => y(Number(r.lat))).attr('r', (r) => Math.max(3, rs(Number(r.cases))))
     .attr('fill', (r) => r.status === 'Active' ? '#0536cf' : '#ffffff').attr('fill-opacity', (r) => r.status === 'Active' ? 0.85 : 0.75)
     .attr('stroke', (r) => r.status === 'Active' ? '#ffffff' : '#7898bf').attr('stroke-width', 1.4).style('cursor', 'pointer')

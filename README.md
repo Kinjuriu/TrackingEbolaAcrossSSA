@@ -36,7 +36,7 @@ Live at **https://kinjuriu.github.io/TrackingEbolaAcrossSSA/** once GitHub Pages
 5. **The dashboard** (`docs/dashboard.html`): d3, with the data in `data/outbreaks.json`, `data/timeline_2026.json` and `data/africa_grid.json`. Palette picked from NASA Earthdata.
 6. **The video** (`scripts/video_scroll.py`): steps through the story frame by frame in headless Chromium and encodes it with ffmpeg.
 
-Annotations follow the field-guide look of the documentary *How to Live on Earth*: Fira Sans labels, Sacramento handwriting and dotted leader lines.
+Annotations follow the field-guide look of the documentary *How to Live on Earth*: Fira Sans labels in light italic and dotted leader lines.
 
 The scripts were written for one working session and use absolute paths; change the paths at the top of each before running them yourself. Raw tile mosaics are not in the repo; re-create them with the browser script.
 
