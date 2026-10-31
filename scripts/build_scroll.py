@@ -10,22 +10,28 @@ def lerp_keys(keys, x):
     return keys[-1][1]
 
 # story position T for each 2026 outbreak day (day 0 = 15 May 2026)
-dayMap = [[16.8, 0], [17.6, 14], [18.6, 39], [19.6, 77], [20.5, 89], [21.4, 136], [22.2, 152], [22.6, 154]]
+dayMap = [[16.8, 0], [17.6, 14], [18.6, 39], [19.6, 77], [20.5, 89], [21.4, 136], [22.2, 152], [22.6, 154], [26.2, 154], [27.4, 166], [40, 166]]
 def T_of_day(d): return lerp_keys([[b, a] for a, b in dayMap], d)
 
-drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[154,9277]]
-drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[154,4478]]
-ituri_share = [[0,1.0],[89,0.853],[152,0.7337],[154,0.7337]]
-final = {"nkivu":1991,"haut":398,"tshopo":64,"basuele":13,"sudkivu":3,"sudubangi":2}
-rem = sum(final.values())
+drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[156,9552],[158,9704],[164,10141],[166,10274]]
+drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[156,4602],[158,4687],[164,4928],[166,4992]]
+ituri_share = [[0,1.0],[89,0.853],[152,0.7337]]
+oct14 = {"ituri":6806,"nkivu":1991,"haut":398,"tshopo":64,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":0}
+oct26 = {"ituri":7247,"nkivu":2345,"haut":442,"tshopo":86,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":3}
+rem14 = sum(v for k, v in oct14.items() if k != "ituri")
 def prov_keys(pid):
+    # up to 14 Oct: national curve split by Ituri's share, ending exactly on the 14 Oct province figures
     ks = []
-    for d in list(range(0, 153, 2)) + [152, 154]:
+    for d in range(0, 153, 2):
         nat = lerp_keys(drc_cases, d); sh = lerp_keys(ituri_share, d)
-        v = nat*sh if pid == "ituri" else nat*(1-sh)*final[pid]/rem
-        if d == 152 and any(abs(k[0]-T_of_day(152))<1e-6 for k in ks): continue
+        v = nat*sh if pid == "ituri" else nat*(1-sh)*oct14[pid]/rem14
         ks.append([round(T_of_day(d), 4), round(v, 1)])
-    exact = {"ituri": 6806, **final}[pid]; ks[-2][1] = exact; ks[-1][1] = exact
+    ks[-1][1] = oct14[pid]
+    # 14 Oct to 26 Oct: straight line between the two ECDC province reports, then hold
+    for d in (156, 160, 164):
+        v = oct14[pid] + (oct26[pid]-oct14[pid])*(d-152)/(164-152)
+        ks.append([round(T_of_day(d), 4), round(v, 1)])
+    ks.append([round(T_of_day(166), 4), oct26[pid]])
     ks.sort(key=lambda k: k[0]); return ks
 
 Z, SU, BU = "Zaire ebolavirus", "Sudan virus", "Bundibugyo virus"
@@ -46,11 +52,12 @@ spikes[-1]["label"] = "Bulape, Kasaï Province, DR Congo"
 for pid, label, lon, lat, side, dy in [("ituri","Ituri Province, DR Congo",30.25,1.56,"right",0),("nkivu","North Kivu Province, DR Congo",29.28,0.13,"left",30),
         ("haut","Haut-Uélé Province, DR Congo",27.62,2.77,"left",-20),("tshopo","Tshopo Province, DR Congo",25.19,0.52,"left",0),
         ("basuele","Bas-Uélé Province, DR Congo",24.73,2.80,"left",0),("sudkivu","South Kivu Province, DR Congo",28.86,-2.51,"left",0),
-        ("sudubangi","Sud-Ubangi Province, DR Congo",19.77,3.25,"left",0)]:
-    d = {"ituri":3148,"nkivu":1133,"haut":167,"tshopo":24,"basuele":4,"sudkivu":1,"sudubangi":1}[pid]
+        ("sudubangi","Sud-Ubangi Province, DR Congo",19.77,3.25,"left",0),("nordubangi","Nord-Ubangi Province, DR Congo",21.01,4.28,"left",0)]:
+    d = {"ituri":3388,"nkivu":1314,"haut":192,"tshopo":27,"basuele":4,"sudkivu":1,"sudubangi":1,"nordubangi":1}[pid]
     spikes.append(sp(pid, label, lon, lat, prov_keys(pid), d, BU, ease=False, side=side, dy=dy))
 spikes.append(sp("kla26","Uganda, Kampala and border districts",32.42,0.48,[[T_of_day(0),0],[T_of_day(1),2],[T_of_day(48),20]],2,BU,ease=False,overT=23.4,overText="Aug. 2026",dy=36))
-spikes.append(sp("nbo","Nairobi County, Kenya",36.82,-1.29,[[25.6,0],[25.8,1],[26.0,2],[26.2,3]],1,BU,ease=False,dy=30))
+spikes.append(sp("nbo","Nairobi County, Kenya",36.82,-1.29,[[25.6,0],[25.8,1],[26.0,2],[26.2,3],[26.8,3],[27.4,9]],2,BU,ease=False,dy=30))
+spikes.append(sp("nga","Abuja, Nigeria (imported)",7.49,9.06,[[26.9,0],[27.3,1]],0,BU,ease=False,side="right",dy=-60))
 
 END = 32.4
 WA = ["Sierra Leone","Liberia","Guinea"]; DRC = "Democratic Republic of the Congo"
@@ -60,7 +67,7 @@ phases = [
   {"t0":11.4,"t1":14.0,"date":"2022 and 2025 · Uganda","ids":["mub","kla25"],"loc":["Uganda"]},
   {"t0":14.0,"t1":16.4,"date":"2025 · DR Congo","ids":["kas"],"loc":[DRC]},
   {"t0":16.4,"t1":24.8,"kind":"2026","loc":[DRC,"Uganda"]},
-  {"t0":24.8,"t1":28.2,"kind":"2026","loc":[DRC,"Uganda","Kenya"]},
+  {"t0":24.8,"t1":28.2,"kind":"2026","loc":[DRC,"Uganda","Kenya","Nigeria"]},
   {"t0":28.2,"t1":END+5,"date":"2014 to 2026 · every outbreak on this map","ids":"all","loc":[]},
 ]
 O = []
@@ -82,7 +89,7 @@ callouts = [
   {"t0":9.0,"t1":11.7,"ids":["beni"]},{"t0":12.0,"t1":14.2,"ids":["mub","kla25"]},
   {"t0":14.6,"t1":16.4,"ids":["kas"]},{"t0":17.2,"t1":22.0,"ids":["ituri","nkivu","kla26"]},
   {"t0":22.0,"t1":23.4,"ids":["ituri","nkivu","haut"]},{"t0":23.4,"t1":25.0,"ids":["kla26","ituri"]},
-  {"t0":25.0,"t1":28.2,"ids":["nbo","ituri"]},{"t0":29.2,"t1":END+5,"ids":["ituri","nbo"]},
+  {"t0":25.0,"t1":28.2,"ids":["nbo","ituri"]},{"t0":29.2,"t1":END+5,"ids":["ituri","nbo","nga"]},
 ]
 cam = [[0,-11.0,8.6,30,64,0],[2.0,-11.8,8.6,13,58,0],[4.0,-10.6,8.3,20,62,0],[6.0,-10.6,8.3,22,64,2],
        [8.0,23.5,-2.5,40,70,0],[10.0,29.3,0.7,11,56,0],[11.0,29.6,0.7,12,58,0],
@@ -124,7 +131,7 @@ DATA = dict(
   cont=dict(bounds=cd["bounds"], grid=cd["grid"], gp=cd["gp"], hscale=cd["hscale"], b64=open(f"{T3}/cont_height.b64").read()),
   chunks=[{"b": c["b"], "f": c["f"]} for c in dims["chunks"]], vec=vec, spikes=spikes, phases=phases, outlines=O, callouts=callouts, cam=cam,
   route=route, routeT=[24.8, 25.8, 28.2], countryLabels=cl, provLabels=pl, loc={"bounds": [-19, 53, -36, 38], "countries": locc},
-  dayMap=dayMap, drcCases=drc_cases, drcDeaths=drc_deaths, uga=[[0,0],[1,2],[48,20]], ugaDeaths=[[0,0],[20,2]],
+  dayMap=dayMap, kenDeaths=[[25.6,0],[25.8,1],[27.0,1],[27.4,2]], drcCases=drc_cases, drcDeaths=drc_deaths, uga=[[0,0],[1,2],[48,20]], ugaDeaths=[[0,0],[20,2]],
   march=[["Gu\u00e9ck\u00e9dou",-10.1,8.6,"2014",1],["Beni",29.47,0.49,"2018"],["Mubende",31.39,0.56,"2022"],["Bulape",21.8,-4.6,"2025",1],["Bunia",30.25,1.56,"2026"],["Nairobi",36.82,-1.29,"2026"]],
   marchT=[29.2, 30.9],
   pull=[28.2, 29.6], night=[31.0, 32.2], pullScale=3.2, end=END,
@@ -161,20 +168,49 @@ steps = [
   "<p>Uganda recorded <b>20 confirmed cases</b> of the Bundibugyo virus linked to the outbreak in neighboring DR Congo. Health authorities contained the spread and officially declared the Ugandan outbreak over in August 2026.</p><p>" + tags(TB) + "</p>"),
  (26.2, "", "October 2026", "<h2>Nairobi, Kenya</h2>",
   "<p>On October 3, a Kenyan national flew from Entebbe, Uganda, to Nairobi. The patient&rsquo;s travel history included transit from Buta in Bas-Uélé through Kisangani and Beni in DR Congo, before crossing the Ugandan border at Mpondwe. The patient died on October 5.</p><p>By October 16, Kenyan health officials confirmed <b>three cases</b> of the Bundibugyo virus, all directly linked to this initial patient.</p><p>" + tags(TB) + "</p>"),
+ (27.4, "", "Late October 2026", "<h2>Kenya&rsquo;s Cluster Grows, and Nigeria Reports a Case</h2>",
+  "<p>Kenya&rsquo;s count rose to <b>nine confirmed cases</b>, all in one cluster linked to the first patient, including three health workers who treated him. On October 23, the Ministry of Health reported a <b>second death</b>, a 65-year-old woman who was a close relative of the first patient. WHO&rsquo;s report of the same day lists the same nine cases.</p>"
+  "<p>On October 20, Nigeria confirmed an imported case in Abuja, a woman who had travelled from Uganda; she was later evacuated to Switzerland for care.</p>"
+  "<p>In DR Congo, the outbreak passed <b>10,000 confirmed cases</b>. By October 28 it stood at <b>10,274 cases</b> and <b>4,992 deaths</b>, across eight provinces after Nord-Ubangi recorded its first cases.</p><p>" + tags(TB) + "</p>"),
  (29.6, "", "2014 to 2026", "<h2>Continental Overview</h2>",
   "<p>Viewing the continent as a whole shows a clear eastward progression of active outbreaks. While the West African and Ugandan epidemics are resolved, the eastern DR Congo outbreak remains active, with a direct transmission link to Nairobi.</p><p>A dotted line connects each outbreak geographically in chronological order, from Guéckédou in 2014 to Nairobi in 2026. Most map points represent separate zoonotic transmission events from animals to humans; however, the 2026 path to Nairobi represents a single, continuous chain of human infection.</p><p>At this map scale, spike heights are calculated using the square root of total cases.</p>"),
  (END, "", "Africa at night", "<h2>Infrastructure and Transmission</h2>",
   "<p>NASA&rsquo;s Black Marble satellite imagery illuminates Africa&rsquo;s active urban centers and transportation networks at night. These connected transit routes facilitated the movement of the virus from eastern DR Congo to Nairobi in two days.</p><p>Behind the data, every spike on the map represents an impacted community.</p>"),
 ]
+# virus micrographs floated in each chapter card (files in /home/claude/virus/, credit NIAID)
+import os
+VIMG = {}
+for key in ("zaire", "sudan", "bundibugyo"):
+    f = f"/home/claude/virus/{key}.jpg"
+    if os.path.exists(f): VIMG[key] = "data:image/jpeg;base64," + base64.b64encode(open(f, "rb").read()).decode()
+VNAME = {"zaire": "Zaire ebolavirus", "sudan": "Sudan virus", "bundibugyo": "Bundibugyo virus"}
+VCRED = {"zaire": ("NIAID via Wikimedia Commons", "https://commons.wikimedia.org/wiki/File:Ebola_Virus_-_Electron_Micrograph.tiff"),
+         "sudan": ("NIAID on Unsplash", "https://unsplash.com/photos/mR-2J-e7Z5I"),
+         "bundibugyo": ("NIAID on Unsplash", "https://unsplash.com/photos/e-h_wfP0OLk")}
+def virus_of(t):
+    if t <= 0 or t >= 29: return None
+    if 12 <= t < 14: return "sudan"
+    if t >= 16.4: return "bundibugyo"
+    return "zaire"
+def fig(t):
+    v = virus_of(t)
+    if not v or v not in VIMG: return ""
+    return f'<figure class="vimg"><span class="vball vb-{v}" role="img" aria-label="Coloured electron micrograph of Ebola virus particles"></span><figcaption>{VNAME[v]}<a href="{VCRED[v][1]}" target="_blank" rel="noopener">Image: {VCRED[v][0]}</a></figcaption></figure>'
+steps = [(t, cls, k, h, fig(t) + body) for t, cls, k, h, body in steps]
 step_html = "\n".join(f'    <section class="step{(" "+cls) if cls else ""}" data-t="{t}"><div class="card{(" "+cls) if cls else ""}">{f'<p class="k">{k}</p>' if k else ""}{h}{body}</div></section>' for t, cls, k, h, body in steps)
 src = [
- ('https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda', 'ECDC', 'DRC cases and deaths by province, data to 14 Oct 2026'),
+ ('https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda', 'ECDC', 'DRC cases and deaths by province, data to 28 Oct 2026'),
  ('https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615', 'WHO Disease Outbreak News', 'and WHO Africa weekly situation reports 21 and 22: 2026 milestones'),
  ('https://www.aljazeera.com/news/2026/10/16/kenya-reports-third-bundibugyo-strain-ebola-case', 'Al Jazeera', 'and the WHO Kenya week 41 report: Kenya cases and the travel route'),
+ ('https://www.the-star.co.ke/news/2026-10-20-kenya-confirms-ninth-ebola-case', 'Kenya Ministry of Health', 'statements of 20 and 23 Oct 2026 via The Star and Capital FM: nine cases, two deaths'),
+ ('https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON622', 'WHO Disease Outbreak News 622', ': DR Congo, Kenya and Nigeria, 23 Oct 2026'),
+ ('https://www.cdc.gov/ebola/situation-summary/index.html', 'US CDC situation summary', ': country totals to 28 Oct 2026'),
+ ('https://www.afro.who.int/countries/kenya/news/who-supports-kenyas-ebola-response-third-case-found-early-quarantine', 'WHO Africa', ': Kenya&rsquo;s third case, 16 Oct 2026'),
  ('https://www.cdc.gov/ebola/outbreaks', 'US CDC outbreak history', ': outbreaks 2014 to 2025'),
  ('https://www.who.int/en/news-room/detail/17-03-2016-who-statement-on-end-of-ebola-flare-up-in-sierra-leone', 'WHO', 'statements on the end of transmission in Sierra Leone, Guinea and Liberia, 2016'),
  ('https://reliefweb.int/report/uganda/disease-outbreak-news-sudan-virus-disease-uganda-26-april-2025', 'WHO via ReliefWeb', ': Uganda 2025 declared over; ECDC for Uganda 2022'),
  ('https://allafrica.com/stories/202512020161.html', 'WHO via allAfrica', ': 2025 Kasaï outbreak, 64 cases and 45 deaths'),
+ ('https://unsplash.com/@niaid', 'NIAID on Unsplash', 'and Wikimedia Commons: coloured electron micrographs of Ebola virus particles (Unsplash License; NIAID credit)'),
  ('https://s2maps.eu', 'Sentinel-2 cloudless 2024', 'by EOX IT Services (CC BY-NC-SA 4.0)'),
  ('https://earthdata.nasa.gov/gibs', 'NASA GIBS', ': Blue Marble Next Generation and VIIRS Black Marble'),
  ('https://registry.opendata.aws/terrain-tiles/', 'Terrain Tiles on AWS', '; Natural Earth and geoBoundaries (CC BY 4.0) for borders'),
@@ -184,7 +220,8 @@ src_html = "\n".join(f'        <li><a href="{u}" target="_blank" rel="noopener">
 files = [c["f"] for c in dims["chunks"]] + ["bluemarble.jpg", "blackmarble.jpg"]
 texmap = {f: "data:image/jpeg;base64," + base64.b64encode(open(f"{T3}/{f}", "rb").read()).decode() for f in files}
 html = open("/home/claude/scroll_template.html").read()
-html = html.replace("__DASHBAND__", open("/home/claude/dashband_clean.html").read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
+vcss = "".join(f".vb-{k}{{background-image:url({u})}}" for k, u in VIMG.items())
+html = html.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", open("/home/claude/dashband_clean.html").read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
 html = html.replace("__DATA__", json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))).replace("__TEXMAP__", json.dumps(texmap, separators=(",", ":")))
 open("/home/claude/ebola-scroll.html", "w").write(html)
 print("ebola-scroll.html", len(html)//1024, "KB")

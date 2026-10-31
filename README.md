@@ -19,9 +19,10 @@ Live at **https://kinjuriu.github.io/TrackingEbolaAcrossSSA/** once GitHub Pages
 | 2022 | Mubende District, Central Region, Uganda | Sudan virus | 164 | 77 | Over, 11 January 2023 |
 | 2025 | Kampala, Central Region, Uganda | Sudan virus | 14 | 4 | Over, 26 April 2025 |
 | 2025 | Bulape, Kasaï Province, DR Congo | Zaire ebolavirus | 64 | 45 | Over, December 2025 |
-| 2026 | Seven DR Congo provinces (Ituri 6,806; North Kivu 1,991; Haut-Uélé 398; Tshopo 64; Bas-Uélé 13; South Kivu 3; Sud-Ubangi 2) | Bundibugyo virus | 9,277 | 4,478 | Active (data to 14 Oct 2026) |
+| 2026 | Eight DR Congo provinces (Ituri 7,247; North Kivu 2,345; Haut-Uélé 442; Tshopo 86; Bas-Uélé 13; South Kivu 3; Nord-Ubangi 3; Sud-Ubangi 2, data to 26 Oct) | Bundibugyo virus | 10,274 | 4,992 | Active (national total to 28 Oct 2026) |
 | 2026 | Uganda | Bundibugyo virus | 20 | 2 | Over, August 2026 |
-| 2026 | Nairobi County, Kenya | Bundibugyo virus | 3 | 1 | Active (16 Oct 2026) |
+| 2026 | Nairobi County, Kenya | Bundibugyo virus | 9 | 2 | Active (Ministry of Health, 23 Oct 2026) |
+| 2026 | Abuja, Nigeria (imported from Uganda) | Bundibugyo virus | 1 | 0 | Active (WHO, 23 Oct 2026) |
 
 **How to read it.** West African spikes are national totals, one per country; 2026 spikes are province totals placed on each province's main town. Spike height is proportional to confirmed cases; in the two whole-continent chapters heights follow the square root of cases so small outbreaks stay visible. Between reporting dates, the 2026 curve and each province's share of it are interpolated. Most outbreaks were separate jumps from animals to people; the dotted line on the continent shows the order they began, not a chain of infection. Only the 2026 route from eastern DR Congo through Uganda to Nairobi, taken from the WHO Kenya week 41 report, was one chain. Ebola is never eradicated, because the virus survives in animals; WHO declares an outbreak over after 42 days with no new cases.
 
@@ -46,6 +47,7 @@ The scripts were written for one working session and use absolute paths; change 
 - ECDC, Ebola outbreak in DRC and Uganda: confirmed cases and deaths by province, data to 14 Oct 2026. https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda
 - WHO Disease Outbreak News, and WHO Africa weekly situation reports 21 and 22 (data to 4 and 11 Oct 2026). https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615
 - WHO Kenya Emergency Preparedness and Response weekly situation report, week 41 (5–16 Oct 2026): the Kenyan case's travel route.
+- WHO Disease Outbreak News 622 (23 Oct 2026), US CDC situation summary (28 Oct 2026), and Kenya Ministry of Health statements of 20 and 23 Oct 2026.
 - Al Jazeera, Kenya's third case, 16 Oct 2026. https://www.aljazeera.com/news/2026/10/16/kenya-reports-third-bundibugyo-strain-ebola-case
 - US CDC outbreak history. https://www.cdc.gov/ebola/outbreaks
 - WHO statements on the end of transmission in Sierra Leone (17 Mar 2016), Guinea (1 Jun 2016) and Liberia (9 Jun 2016). https://www.who.int/en/news-room/detail/17-03-2016-who-statement-on-end-of-ebola-flare-up-in-sierra-leone · https://www.afro.who.int/news/end-ebola-transmission-guinea · https://afro.who.int/news/who-declares-end-most-recent-ebola-virus-disease-outbreak-liberia
