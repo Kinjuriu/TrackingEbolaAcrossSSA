@@ -100,5 +100,11 @@
   "cases": 10274,
   "deaths": 4992,
   "source": "ECDC and US CDC, data to 28 Oct"
+ },
+ {
+  "day": "2026-10-31",
+  "cases": 10351,
+  "deaths": 5026,
+  "source": "DRC Ministry of Health via Reuters, 31 Oct"
  }
 ]

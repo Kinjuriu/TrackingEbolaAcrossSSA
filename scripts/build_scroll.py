@@ -10,11 +10,11 @@ def lerp_keys(keys, x):
     return keys[-1][1]
 
 # story position T for each 2026 outbreak day (day 0 = 15 May 2026)
-dayMap = [[16.8, 0], [17.6, 14], [18.6, 39], [19.6, 77], [20.5, 89], [21.4, 136], [22.2, 152], [22.6, 154], [26.2, 154], [27.4, 166], [40, 166]]
+dayMap = [[16.8, 0], [17.6, 14], [18.6, 39], [19.6, 77], [20.5, 89], [21.4, 136], [22.2, 152], [22.6, 154], [26.2, 154], [27.4, 169], [40, 169]]
 def T_of_day(d): return lerp_keys([[b, a] for a, b in dayMap], d)
 
-drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[156,9552],[158,9704],[164,10141],[166,10274]]
-drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[156,4602],[158,4687],[164,4928],[166,4992]]
+drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[156,9552],[158,9704],[164,10141],[166,10274],[169,10351]]
+drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[156,4602],[158,4687],[164,4928],[166,4992],[169,5026]]
 ituri_share = [[0,1.0],[89,0.853],[152,0.7337]]
 oct14 = {"ituri":6806,"nkivu":1991,"haut":398,"tshopo":64,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":0}
 oct26 = {"ituri":7247,"nkivu":2345,"haut":442,"tshopo":86,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":3}
@@ -171,7 +171,7 @@ steps = [
  (27.4, "", "Late October 2026", "<h2>Kenya&rsquo;s Cluster Grows, and Nigeria Reports a Case</h2>",
   "<p>Kenya&rsquo;s count rose to <b>nine confirmed cases</b>, all in one cluster linked to the first patient, including three health workers who treated him. On October 23, the Ministry of Health reported a <b>second death</b>, a 65-year-old woman who was a close relative of the first patient. WHO&rsquo;s report of the same day lists the same nine cases.</p>"
   "<p>On October 20, Nigeria confirmed an imported case in Abuja, a woman who had travelled from Uganda; she was later evacuated to Switzerland for care.</p>"
-  "<p>In DR Congo, the outbreak passed <b>10,000 confirmed cases</b>. By October 28 it stood at <b>10,274 cases</b> and <b>4,992 deaths</b>, across eight provinces after Nord-Ubangi recorded its first cases.</p><p>" + tags(TB) + "</p>"),
+  "<p>In DR Congo, the outbreak passed <b>10,000 confirmed cases</b>. By October 31, the Ministry of Health counted <b>10,351 cases</b> and <b>5,026 deaths</b>, across eight provinces after Nord-Ubangi recorded its first cases.</p><p>" + tags(TB) + "</p>"),
  (29.6, "", "2014 to 2026", "<h2>Continental Overview</h2>",
   "<p>Viewing the continent as a whole shows a clear eastward progression of active outbreaks. While the West African and Ugandan epidemics are resolved, the eastern DR Congo outbreak remains active, with a direct transmission link to Nairobi.</p><p>A dotted line connects each outbreak geographically in chronological order, from Guéckédou in 2014 to Nairobi in 2026. Most map points represent separate zoonotic transmission events from animals to humans; however, the 2026 path to Nairobi represents a single, continuous chain of human infection.</p><p>At this map scale, spike heights are calculated using the square root of total cases.</p>"),
  (END, "", "Africa at night", "<h2>Infrastructure and Transmission</h2>",
@@ -199,7 +199,7 @@ def fig(t):
 steps = [(t, cls, k, h, fig(t) + body) for t, cls, k, h, body in steps]
 step_html = "\n".join(f'    <section class="step{(" "+cls) if cls else ""}" data-t="{t}"><div class="card{(" "+cls) if cls else ""}">{f'<p class="k">{k}</p>' if k else ""}{h}{body}</div></section>' for t, cls, k, h, body in steps)
 src = [
- ('https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda', 'ECDC', 'DRC cases and deaths by province, data to 28 Oct 2026'),
+ ('https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda', 'ECDC', 'DRC cases and deaths by province to 26 Oct 2026; national totals to 31 Oct from the DRC Ministry of Health via Reuters'),
  ('https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615', 'WHO Disease Outbreak News', 'and WHO Africa weekly situation reports 21 and 22: 2026 milestones'),
  ('https://www.aljazeera.com/news/2026/10/16/kenya-reports-third-bundibugyo-strain-ebola-case', 'Al Jazeera', 'and the WHO Kenya week 41 report: Kenya cases and the travel route'),
  ('https://www.the-star.co.ke/news/2026-10-20-kenya-confirms-ninth-ebola-case', 'Kenya Ministry of Health', 'statements of 20 and 23 Oct 2026 via The Star and Capital FM: nine cases, two deaths'),
@@ -218,10 +218,37 @@ src = [
 src_html = "\n".join(f'        <li><a href="{u}" target="_blank" rel="noopener">{a}</a> {b}</li>' for u, a, b in src)
 
 files = [c["f"] for c in dims["chunks"]] + ["bluemarble.jpg", "blackmarble.jpg"]
-texmap = {f: "data:image/jpeg;base64," + base64.b64encode(open(f"{T3}/{f}", "rb").read()).decode() for f in files}
+# textures ship as separate WebP files so the page text appears at once and images load in parallel and cache
+from PIL import Image as _Im
+TEXDIR = "/home/claude/repo2/docs/tex"; os.makedirs(TEXDIR, exist_ok=True)
+texmap = {}
+for f in files:
+    w = f.rsplit(".", 1)[0] + ".webp"
+    _Im.open(f"{T3}/{f}").convert("RGB").save(f"{TEXDIR}/{w}", "WEBP", quality=80, method=6)
+    texmap[f] = "tex/" + w
 html = open("/home/claude/scroll_template.html").read()
 vcss = "".join(f".vb-{k}{{background-image:url({u})}}" for k, u in VIMG.items())
 html = html.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", open("/home/claude/dashband_clean.html").read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
 html = html.replace("__DATA__", json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))).replace("__TEXMAP__", json.dumps(texmap, separators=(",", ":")))
-open("/home/claude/ebola-scroll.html", "w").write(html)
+open("/home/claude/ebola-scroll.html", "w").write(html); open("/home/claude/repo2/docs/index.html", "w").write(html)
+# article page: the same scrolling map on top, the article below instead of the dashboard band
+import re as _re
+art = open("/home/claude/article_body.html").read()
+TITLE = "Ebola\u2019s journey from west to east: is it going to the rest of the world?"
+art_body = _re.sub(r'\s*<h1>.*?</h1>', '', art, count=1, flags=_re.S)
+faq = _re.findall(r'<details><summary>(.*?)</summary><p>(.*?)</p></details>', art, flags=_re.S)
+strip = lambda x: _re.sub(r'<[^>]+>', '', x).replace('&rsquo;', '\u2019')
+ld = {"@context": "https://schema.org", "@graph": [
+  {"@type": "Article", "headline": TITLE, "author": {"@type": "Person", "name": "Stephane Njoki"}, "datePublished": "2026-11-02", "image": "https://kinjuriu.github.io/TrackingEbolaAcrossSSA/film-cover.jpg"},
+  {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": strip(q), "acceptedAnswer": {"@type": "Answer", "text": strip(a_)}} for q, a_ in faq]}]}
+ahtml = open("/home/claude/scroll_template.html").read()
+ahtml = ahtml.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", art_body)
+astep = step_html.replace("<h1>Ebola in Africa: 2014 to 2026</h1>", "<h1>" + TITLE.replace("\u2019", "&rsquo;") + "</h1>", 1)
+ahtml = ahtml.replace("__STEPS__", astep).replace("__SOURCES__", src_html)
+ahtml = ahtml.replace("__DATA__", json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))).replace("__TEXMAP__", json.dumps(texmap, separators=(",", ":")))
+ahtml = _re.sub(r"<title>.*?</title>", "<title>Is Ebola going to the rest of the world? Ebola\u2019s journey from west to east</title>", ahtml, count=1)
+ahtml = _re.sub(r'<meta name="description" content="[^"]*">', '<meta name="description" content="How Ebola spreads, how deadly the 2026 Bundibugyo outbreak is, and how likely it is to reach Europe, North America and the rest of the world, with a satellite map of every outbreak from 2014 to 2026.">', ahtml, count=1)
+ahtml = ahtml.replace('<meta property="og:type" content="article">', '<meta property="og:type" content="article">\n<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False) + '</script>', 1)
+open("/home/claude/article_draft.html", "w").write(ahtml)  # draft only, not published
+print("article.html", len(ahtml)//1024, "KB, FAQ items", len(faq))
 print("ebola-scroll.html", len(html)//1024, "KB")

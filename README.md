@@ -19,7 +19,7 @@ Live at **https://kinjuriu.github.io/TrackingEbolaAcrossSSA/** once GitHub Pages
 | 2022 | Mubende District, Central Region, Uganda | Sudan virus | 164 | 77 | Over, 11 January 2023 |
 | 2025 | Kampala, Central Region, Uganda | Sudan virus | 14 | 4 | Over, 26 April 2025 |
 | 2025 | Bulape, Kasaï Province, DR Congo | Zaire ebolavirus | 64 | 45 | Over, December 2025 |
-| 2026 | Eight DR Congo provinces (Ituri 7,247; North Kivu 2,345; Haut-Uélé 442; Tshopo 86; Bas-Uélé 13; South Kivu 3; Nord-Ubangi 3; Sud-Ubangi 2, data to 26 Oct) | Bundibugyo virus | 10,274 | 4,992 | Active (national total to 28 Oct 2026) |
+| 2026 | Eight DR Congo provinces (Ituri 7,247; North Kivu 2,345; Haut-Uélé 442; Tshopo 86; Bas-Uélé 13; South Kivu 3; Nord-Ubangi 3; Sud-Ubangi 2, data to 26 Oct) | Bundibugyo virus | 10,351 | 5,026 | Active (DR Congo Ministry of Health, 31 Oct 2026) |
 | 2026 | Uganda | Bundibugyo virus | 20 | 2 | Over, August 2026 |
 | 2026 | Nairobi County, Kenya | Bundibugyo virus | 9 | 2 | Active (Ministry of Health, 23 Oct 2026) |
 | 2026 | Abuja, Nigeria (imported from Uganda) | Bundibugyo virus | 1 | 0 | Active (WHO, 23 Oct 2026) |

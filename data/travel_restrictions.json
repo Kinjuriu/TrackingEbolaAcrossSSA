@@ -1,0 +1,110 @@
+[
+ {
+  "imposer": "Saudi Arabia",
+  "affected": "Kenya (and anyone in an affected country in the past 21 days)",
+  "measure": "All visas suspended, entry banned for travellers from Kenya, Saudi citizens told not to travel to Kenya",
+  "date": "2026-10-30",
+  "status": "In force",
+  "source": "Saudi Press Agency via Gulf News",
+  "url": "https://gulfnews.com/world/gulf/saudi/saudi-arabia-suspends-travel-to-kenya-bans-visas-and-entry-over-ebola-concerns-1.500730401"
+ },
+ {
+  "imposer": "United States",
+  "affected": "DR Congo; Uganda and South Sudan",
+  "measure": "No boarding for anyone in DR Congo in the past 21 days; travellers from Uganda or South Sudan routed to designated airports for screening; from 3 Nov all international passengers sign a no-DRC attestation",
+  "date": "2026-05-18",
+  "status": "In force",
+  "source": "US CDC",
+  "url": "https://www.cdc.gov/ebola/situation-summary/index.html"
+ },
+ {
+  "imposer": "Canada",
+  "affected": "DR Congo, Uganda, South Sudan",
+  "measure": "Visas and eTAs of residents suspended; no boarding for foreign nationals in DR Congo in the past 21 days",
+  "date": "2026-05-27",
+  "status": "In force until 27 Nov",
+  "source": "Government of Canada",
+  "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/special-measures/ebola-2026.html"
+ },
+ {
+  "imposer": "United Arab Emirates",
+  "affected": "DR Congo, Uganda, South Sudan",
+  "measure": "New visas suspended for nationals; entry only after 21 days outside these countries",
+  "date": "2026-06-06",
+  "status": "Announced, no end date",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ },
+ {
+  "imposer": "Kuwait",
+  "affected": "DR Congo, Uganda, South Sudan",
+  "measure": "Entry ban for non-Kuwaitis who were there in the past 21 days, including transit",
+  "date": "2026-06",
+  "status": "Announced, no end date",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ },
+ {
+  "imposer": "Rwanda",
+  "affected": "DR Congo",
+  "measure": "Entry suspended for anyone in or through DR Congo in the past 30 days; returning residents quarantined",
+  "date": "2026-06",
+  "status": "Announced, no end date",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ },
+ {
+  "imposer": "Lebanon",
+  "affected": "DR Congo, Uganda",
+  "measure": "Entry ban for nationals",
+  "date": "2026-06",
+  "status": "Announced, no end date",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ },
+ {
+  "imposer": "Taiwan",
+  "affected": "DR Congo, Uganda",
+  "measure": "Entry ban for nationals and residents, with exemptions",
+  "date": "2026-06",
+  "status": "Announced, no end date",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ },
+ {
+  "imposer": "Mauritius",
+  "affected": "DR Congo, Uganda, South Sudan",
+  "measure": "Entry ban for visitors who were there in the past 21 days; exempt residents quarantined",
+  "date": "2026-06-09",
+  "status": "Announced, no end date",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ },
+ {
+  "imposer": "Uganda",
+  "affected": "DR Congo",
+  "measure": "Direct flights suspended; bus and boat border crossings halted",
+  "date": "2026-05",
+  "status": "Temporary (four weeks)",
+  "source": "Al Jazeera",
+  "url": "https://www.aljazeera.com/news/2026/5/28/ebola-outbreak-what-travel-restrictions-have-countries-imposed"
+ },
+ {
+  "imposer": "Jordan",
+  "affected": "DR Congo, Uganda",
+  "measure": "Entry ban for non-Jordanian arrivals",
+  "date": "2026-05-19",
+  "status": "Ended 19 June",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ },
+ {
+  "imposer": "Bahrain",
+  "affected": "DR Congo, Uganda, South Sudan",
+  "measure": "Entry ban for foreign travellers",
+  "date": "2026-05-19",
+  "status": "Ended 19 June",
+  "source": "Fragomen",
+  "url": "https://www.fragomen.com/insights/middle-eastafrica-temporary-ebola-related-entry-restrictions-introduced.html"
+ }
+]

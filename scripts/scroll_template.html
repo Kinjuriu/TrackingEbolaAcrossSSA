@@ -1,5 +1,14 @@
-<meta name="claude:viewport-fit-sides" content="cover">
-<title>Ebola Across Africa</title>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ebola in Africa: 2014 to 2026, from Sierra Leone to Nairobi</title>
+<meta name="description" content="A satellite-map data story tracking every Ebola outbreak in Africa from 2014 to 2026, from Sierra Leone to the 2026 Bundibugyo outbreak in DR Congo, Uganda, Kenya and Nigeria, with WHO, ECDC and CDC figures.">
+<meta property="og:title" content="Ebola in Africa: 2014 to 2026">
+<meta property="og:description" content="Twelve years of Ebola outbreaks on satellite imagery, from Sierra Leone to Nairobi.">
+<meta property="og:image" content="https://kinjuriu.github.io/TrackingEbolaAcrossSSA/film-cover.jpg">
+<meta property="og:type" content="article">
+<link rel="preload" as="image" href="tex/bluemarble.webp" crossorigin="anonymous">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap">
 <style>
@@ -46,6 +55,7 @@ svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 
 .loc{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));width:clamp(92px,11vw,140px);pointer-events:none;transition:opacity .4s}
 .loc svg{width:100%;height:auto;display:block;overflow:visible}
+.loadnote{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);pointer-events:none}
 .credit{position:absolute;right:12px;bottom:4px;font-size:9.5px;color:rgba(225,230,222,.5);pointer-events:none;text-align:right;max-width:60%}
 @media (max-width:700px){.credit{display:none}.loc{bottom:auto;top:96px;width:84px}}
 
@@ -106,6 +116,7 @@ __VIMGCSS__
     <div class="readout"><div class="r-date" id="rDate"></div><div class="r-cases" id="rCases"></div><div class="r-deaths" id="rDeaths"></div></div>
     <div class="loc" id="loc"><svg id="locsvg" viewBox="0 0 160 160"></svg></div>
     <div class="credit" id="credit"></div>
+    <div class="loadnote" id="loadnote">Loading satellite imagery&hellip;</div>
   </div>
 
   <div class="steps" id="steps">
@@ -174,7 +185,8 @@ function plane(b, gp, hfn, yoff){
   for(let i=0;i<p.count;i++){ const lon=cx+p.getX(i), lat=cz-p.getZ(i); p.setXYZ(i, X(lon), hfn(lon,lat)+yoff, Z(lat)); }
   return g;
 }
-function tex(name){ const t=loader.load(TEX[name], ()=>{ needsRender=true; }); t.anisotropy=aniso; t.minFilter=THREE.LinearMipmapLinearFilter; return t; }
+let texLoaded=0; const texTotal=Object.keys(TEX).length;
+function tex(name){ const t=loader.load(TEX[name], ()=>{ needsRender=true; texLoaded++; if(texLoaded>=Math.min(6,texTotal)){ const n=document.getElementById("loadnote"); if(n) n.style.display="none"; } }); t.anisotropy=aniso; t.minFilter=THREE.LinearMipmapLinearFilter; return t; }
 // whole continent: Blue Marble with Black Marble over it
 const contGeo = plane(D.cont.bounds, D.cont.gp, (lo,la)=>hCon(lo,la)*0.92, -0.05);
 const blueMat = new THREE.MeshBasicMaterial({map:tex("bluemarble.jpg")});
