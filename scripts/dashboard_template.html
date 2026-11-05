@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ebola Outbreak Monitor</title>
+<meta name="description" content="Filterable dashboard of Ebola outbreaks in sub-Saharan Africa, 2014 to 2026. Updated as WHO publishes new situation reports.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600&display=swap">
+<style>
+:root{color-scheme:light}
+html,body{margin:0;background:#fff;color:#1a2230}
+body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px))}
+.nav{max-width:1320px;margin:0 auto 18px;display:flex;gap:18px;font:14px "Fira Sans",system-ui,sans-serif}
+.nav a{color:#1a2230;text-decoration:underline;text-underline-offset:3px}
+</style>
+</head><body>
+<nav class="nav"><a href="./">The story</a><a href="./film.html">The film</a><a href="https://github.com/Kinjuriu/TrackingEbolaAcrossSSA">Code and data</a></nav>
+<div id="dash-root">
+<script>
+(function(){
+  __DATALINE__
+  let P = Object.assign({}, DEFAULTS); const subs = [], calcs = {};
+  const run = () => subs.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
+  // a small store: named datasets, derived datasets, filter state and redraw callbacks
+  window.dash = {
+    data(id){ if (calcs[id]) { const c = calcs[id]; return {status:"ok", data:c.fn(...c.inputs.map((i) => window.dash.data(i).data))}; }
+      const d = DATA[id]; return d ? {status:"ok", data:d} : {status:"missing", data:[]}; },
+    onData(fn){ subs.push(fn); try { fn(); } catch (e) { console.error(e); } },
+    calc(id, o){ calcs[id] = o; },
+    params(){ return Object.assign({}, P); },
+    setParams(o){ P = Object.assign({}, P, o); run(); },
+    resetParams(){ P = Object.assign({}, DEFAULTS); run(); }
+  };
+  let w = window.innerWidth; window.addEventListener("resize", () => { if (window.innerWidth !== w) { w = window.innerWidth; run(); } });
+})();
+</script>
+<style>
+.sg{--ink:#1a2230;--muted:#4b5767;--faint:#5c6878;--line:#d9dfe6;--line2:#eceff3;--soft:#f5f7f9;
+  --zaire:#009e73;--sudan:#2a86c8;--bundi:#d55e00;--dot:#c9d1da;--dothot:#7c8a9a;
+  --text:"Fira Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;background:#fff;color:var(--ink);font-family:var(--text);font-size:14px;line-height:1.5;max-width:1320px;margin-inline:auto}
+.sg *{box-sizing:border-box}
+.sg-main{display:flex;flex-direction:column;gap:0;min-width:0}
+.sg-h1{font-weight:600;font-size:clamp(26px,3vw,34px);line-height:1.15;margin:0}
+.sg-lede{font-size:16px;color:var(--ink);margin:8px 0 0;max-width:80ch}
+.sg-lede b{font-weight:600}
+.sg-note{font-size:13px;color:var(--faint);margin:8px 0 0;max-width:110ch}
+
+/* filters: one ruled bar that stays at the top of the window while you scroll to the map and charts */
+.sg-filters{position:sticky;top:0;z-index:4;background:#fff;border-top:1px solid var(--ink);border-bottom:1px solid var(--line);padding:12px 0 10px;margin-top:20px}
+@media (max-width:760px){.sg-filters{position:static}}
+.sg-frow{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:flex-end}
+.sg-lab{font-size:12.5px;font-weight:500;color:var(--muted);margin:0 0 5px}
+.sg-seg{display:flex;flex-wrap:wrap}
+.sg-seg button{font:inherit;font-size:13.5px;color:var(--ink);background:#fff;border:1px solid var(--line);margin-left:-1px;padding:5px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;line-height:1.35}
+.sg-seg button:first-child{margin-left:0}
+.sg-seg button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff;position:relative;z-index:1}
+.sw{width:10px;height:10px;display:inline-block;flex:none}
+.sw.Zaire{background:var(--zaire)} .sw.Sudan{background:var(--sudan)} .sw.Bundibugyo{background:var(--bundi)}
+.sg-seg button[aria-pressed=true] .sw{outline:1px solid #fff}
+.sg-sel{font:inherit;font-size:13.5px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:0;padding:5px 8px;cursor:pointer}
+.sg-fact{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.sg-clear{font:inherit;font-size:13.5px;color:var(--ink);background:none;border:0;padding:5px 0;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.sg-count{color:var(--muted);font-size:13.5px}
+.sg button:focus-visible,.sg select:focus-visible,.sg input:focus-visible,.sg a:focus-visible,.sg [tabindex]:focus-visible{outline:2px solid #1a56db;outline-offset:2px}
+
+/* sections are separated by rules, not boxed in cards */
+.sg-sec{padding:22px 0 24px;border-bottom:1px solid var(--line);min-width:0}
+.sg-ct{font-size:19px;font-weight:600;margin:0}
+.sg-cs{font-size:13.5px;color:var(--muted);margin:3px 0 0}
+.sg-fn{font-size:12.5px;color:var(--faint);margin:10px 0 0}
+
+.sg-top{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:0 40px;border-bottom:1px solid var(--line)}
+.sg-top .sg-sec{border-bottom:0}
+@media (max-width:980px){.sg-top{grid-template-columns:minmax(0,1fr)}.sg-top .sg-sec+.sg-sec{border-top:1px solid var(--line)}}
+.sg-kv{display:grid;grid-template-columns:42% 58%;gap:6px 10px;font-size:13.5px;margin:12px 0 0}
+.sg-kv dt{color:var(--muted)}
+.sg-kv dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+.sg-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px}
+@media (max-width:560px){.sg-kpis{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}.sg-kpis .sg-kpi:nth-child(3){border-left:0;padding-left:0}}
+.sg-kpi{padding:4px 16px 4px 0}
+.sg-kpi+.sg-kpi{padding-left:16px;border-left:1px solid var(--line)}
+.sg-kh{font-size:13px;color:var(--muted)}
+.sg-kv2{font-size:30px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.2;margin:2px 0}
+.sg-kd{font-size:12.5px;color:var(--faint)}
+
+.sg-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;border-bottom:1px solid var(--line)}
+/* on large screens the map stays in view under the filter bar while the right-hand column scrolls past */
+@media (min-width:981px) and (min-height:760px){#where{position:sticky;top:var(--fh,120px);align-self:start}#c-map svg{max-height:calc(100vh - var(--fh,120px) - 150px);margin:0 auto}}
+.sg-grid > .sg-sec{border-bottom:0}
+.sg-col > .sg-sec:last-child{border-bottom:0}
+@media (max-width:980px){.sg-grid{grid-template-columns:minmax(0,1fr)}.sg-col{border-top:1px solid var(--line)}}
+.sg-key{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.sg-key span{display:inline-flex;align-items:center;gap:6px}
+.sg-key svg{display:block}
+.sg-chart{position:relative;width:100%}
+.sg-chart svg{display:block;overflow:visible}
+.sg-map{margin-top:6px}
+.sg-map svg{overflow:hidden}
+.sg-tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sg-map .site{cursor:pointer}
+.sg-map .site:focus{outline:none}
+.sg-map .site:focus-visible{stroke:#1a56db;stroke-width:2.5}
+
+.sg-table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.sg-table th{text-align:left;font-weight:500;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--ink);white-space:nowrap;vertical-align:bottom}
+.sg-table th button{all:unset;cursor:pointer}
+.sg-table th[aria-sort=ascending] button::after{content:" \2191"} .sg-table th[aria-sort=descending] button::after{content:" \2193"}
+.sg-table td{padding:9px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+#t-out td:nth-child(3),#t-out td:nth-child(5){white-space:nowrap}
+.sg-table td:first-child,.sg-table th:first-child{padding-left:0}
+.sg-table tr[data-key]{cursor:pointer}
+.sg-table tbody tr.sel td{background:var(--soft)}
+.sg-num{text-align:right}
+.sg-vir{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sg-act{font-weight:600}
+.sg-hide-n{display:table-cell} .sg-show-n{display:none}
+@media (max-width:760px){.sg-hide-n{display:none}.sg-show-n{display:inline}.sg-table.sg-travel tbody td:first-child{white-space:normal;min-width:7.5em}}
+.sg-travel td:first-child{white-space:nowrap}
+.sg-travel .flag{display:inline-block;width:20px;height:15px;vertical-align:-2px;margin-right:8px;border:1px solid var(--line2)}
+.sg-travel .af{display:block;font-weight:500}
+.sg-travel .st{display:block;font-size:12.5px;color:var(--faint);margin:2px 0 0 30px}
+.sg-tbar{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.sg-search{font:inherit;font-size:13.5px;border:1px solid var(--line);border-radius:0;padding:6px 9px;width:16rem;max-width:100%}
+.sg-tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--ink);padding:6px 9px;font-size:13px;z-index:5;max-width:280px}
+.sg-tip .t{font-weight:500;margin-bottom:2px}
+.sg-foot{font-size:12.5px;color:var(--faint);line-height:1.6;margin-top:18px;max-width:120ch}
+</style>
+
+<div class="sg" id="sg">
+  <main class="sg-main">
+    <header id="overview">
+      <h1 class="sg-h1">Ebola Outbreaks</h1>
+      <p class="sg-lede">Every Ebola outbreak in sub-Saharan Africa since 2014. The 2026 Bundibugyo outbreak has <b id="lede-drc">10,351</b> confirmed cases in DR Congo, the second largest on record, Kenya has confirmed <b id="lede-ken">9</b> cases and 2 deaths, and Nigeria has one imported case.</p>
+      <p class="sg-note">Data will be updated as the WHO shares new situation reports. Latest: DR Congo Ministry of Health, 31 October 2026; ECDC and US CDC to 28 October; provinces to 26 October. 2026 figures are confirmed cases and are provisional.</p>
+    </header>
+
+    <section class="sg-filters" id="explore" aria-label="Filters">
+      <div class="sg-frow">
+        <div><p class="sg-lab">Virus</p><div class="sg-seg" id="virus">
+          <button type="button" data-v="">All viruses</button><button type="button" data-v="Zaire"><i class="sw Zaire"></i>Zaire</button><button type="button" data-v="Sudan"><i class="sw Sudan"></i>Sudan</button><button type="button" data-v="Bundibugyo"><i class="sw Bundibugyo"></i>Bundibugyo</button></div></div>
+        <div><p class="sg-lab">Period</p><div class="sg-seg" id="period">
+          <button type="button" data-v="all">All years</button><button type="button" data-v="2014-2019">2014&ndash;2019</button><button type="button" data-v="2020-2025">2020&ndash;2025</button><button type="button" data-v="2026">2026</button></div></div>
+        <div><p class="sg-lab"><label for="f-country">Country</label></p><select class="sg-sel" id="f-country"></select></div>
+        <div><p class="sg-lab">Status</p><div class="sg-seg" id="status">
+          <button type="button" data-v="">Any</button><button type="button" data-v="Active">Active</button><button type="button" data-v="Over">Declared over</button></div></div>
+        <div class="sg-fact"><button type="button" class="sg-clear" id="reset">Clear filters</button><span class="sg-count" id="count" aria-live="polite"></span></div>
+      </div>
+    </section>
+
+    <div class="sg-top">
+      <section class="sg-sec" aria-label="Current outbreak">
+        <h2 class="sg-ct">Current outbreak</h2>
+        <dl class="sg-kv">
+          <dt>Virus</dt><dd><span class="sg-vir"><i class="sw Bundibugyo"></i>Bundibugyo virus</span></dd>
+          <dt>Declared</dt><dd>15 May 2026, Ituri</dd>
+          <dt>Confirmed cases</dt><dd id="t-cases">—</dd>
+          <dt>Deaths</dt><dd id="t-deaths">—</dd>
+          <dt>Case fatality</dt><dd id="t-cfr">—</dd>
+          <dt>DRC provinces</dt><dd id="t-prov">—</dd>
+          <dt>Countries</dt><dd id="t-ctry">—</dd>
+          <dt>Vaccine</dt><dd>None licensed</dd>
+          <dt>Status</dt><dd>Active</dd>
+        </dl>
+      </section>
+      <section class="sg-sec" aria-label="Summary">
+        <h2 class="sg-ct">Summary</h2><p class="sg-cs" id="k-scope">All outbreaks since 2014</p>
+        <div class="sg-kpis">
+          <div class="sg-kpi"><div class="sg-kh">Confirmed cases</div><div class="sg-kv2" id="k-cases">—</div><div class="sg-kd" id="k-cases-s"></div></div>
+          <div class="sg-kpi"><div class="sg-kh">Deaths</div><div class="sg-kv2" id="k-deaths">—</div><div class="sg-kd" id="k-deaths-s"></div></div>
+          <div class="sg-kpi"><div class="sg-kh">Case fatality</div><div class="sg-kv2" id="k-cfr">—</div><div class="sg-kd">deaths per confirmed case</div></div>
+          <div class="sg-kpi"><div class="sg-kh">Outbreak locations</div><div class="sg-kv2" id="k-locs">—</div><div class="sg-kd" id="k-locs-s"></div></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="sg-grid">
+      <section class="sg-sec" id="where">
+        <h2 class="sg-ct">Where</h2><p class="sg-cs" id="c-where-n">Outbreak locations in your selection</p>
+        <div class="sg-key" aria-label="Map key">
+          <span><i class="sw Zaire"></i>Zaire</span><span><i class="sw Sudan"></i>Sudan</span><span><i class="sw Bundibugyo"></i>Bundibugyo</span>
+          <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="#4b5767"/></svg>active</span>
+          <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="#fff" stroke="#4b5767" stroke-width="1.5"/></svg>declared over</span>
+          <span><svg width="44" height="24" aria-hidden="true"><circle cx="8" cy="16" r="4" fill="none" stroke="#4b5767"/><circle cx="30" cy="12" r="11" fill="none" stroke="#4b5767"/></svg>circle area shows confirmed cases</span>
+        </div>
+        <div class="sg-chart sg-map" id="c-map"></div>
+        <p class="sg-fn">Darker dots mark the countries in your selection. Select a circle to filter by its country.</p>
+      </section>
+      <div class="sg-col">
+        <section class="sg-sec" id="growth">
+          <h2 class="sg-ct">2026 outbreak over time</h2><p class="sg-cs">DR Congo, cumulative confirmed cases and deaths</p>
+          <div class="sg-chart" id="c-growth"></div>
+          <p class="sg-fn">Markers are reported figures; lines join them. Source: DR Congo Ministry of Health, WHO, ECDC, US CDC.</p>
+        </section>
+        <section class="sg-sec" id="travel">
+          <h2 class="sg-ct">Travel restrictions</h2><p class="sg-cs">Entry bans and visa suspensions countries have announced over the 2026 outbreak</p>
+          <div class="sg-tw" style="margin-top:10px"><table class="sg-table sg-travel"><thead><tr><th>Country</th><th>Who it affects, and how</th><th class="sg-hide-n">Since</th></tr></thead><tbody id="t-travel"></tbody></table></div>
+          <p class="sg-fn">As reported by governments and news agencies; rules change often, so check official sources before travelling.</p>
+        </section>
+      </div>
+    </div>
+
+    <section class="sg-sec" id="years">
+      <h2 class="sg-ct">Cases by start year</h2><p class="sg-cs" id="c-years-n"></p>
+      <div class="sg-chart" id="c-years" style="margin-top:12px"></div>
+      <p class="sg-fn">Bars are stacked by virus. Earlier outbreaks show final totals.</p>
+    </section>
+
+    <section class="sg-sec" id="outbreaks" style="border-bottom:0">
+      <div class="sg-tbar">
+        <div><h2 class="sg-ct">Outbreak locations</h2><p class="sg-cs" id="t-count"></p></div>
+        <input class="sg-search" id="f-q" type="search" placeholder="Search places, countries, viruses" aria-label="Search outbreak locations">
+      </div>
+      <div class="sg-tw"><table class="sg-table" id="t-out">
+        <thead><tr>
+          <th><button type="button" data-sort="location">Location</button></th>
+          <th><button type="button" data-sort="country">Country</button></th>
+          <th><button type="button" data-sort="year">Period</button></th>
+          <th class="sg-hide-n"><button type="button" data-sort="virus">Virus</button></th>
+          <th><button type="button" data-sort="status">Status</button></th>
+          <th class="sg-num"><button type="button" data-sort="cases">Cases</button></th>
+          <th class="sg-num"><button type="button" data-sort="deaths">Deaths</button></th>
+          <th class="sg-num"><button type="button" data-sort="cfr">Case fatality</button></th>
+          <th class="sg-hide-n"><button type="button" data-sort="source">Source</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </section>
+
+    <p class="sg-foot" id="sources">Sources: ECDC (DR Congo provinces, data to 26 Oct 2026); WHO Disease Outbreak News and WHO Africa situation reports; Kenya Ministry of Health; US CDC outbreak history; WHO end-of-outbreak statements; UKHSA. Virus colours match the virus key in the story. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. Uganda&rsquo;s 2026 chain was declared over in August; one linked case in France is not shown. Flags: flag-icons (MIT licence).</p>
+    <div class="sg-tip" id="tip" hidden></div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+window.fmt = d3.format(','); window.pct = d3.format('.1%');
+window.toN = (v) => (v === null || v === undefined || v === '') ? null : Number(v);
+const VC = { Zaire: '#009e73', Sudan: '#2a86c8', Bundibugyo: '#d55e00' };
+dash.calc('cfr', { inputs: ['outbreaks'], fn: (outbreaks) => outbreaks.map((r) => ({ id: r.id, cfr: Number(r.cases) ? Number(r.deaths) / Number(r.cases) : null })) });
+window.sgState = { sort: 'cases', dir: -1 };
+window.sgTip = (lines, x, y) => {
+  const tip = document.getElementById('tip'), root = document.querySelector('.sg-main');
+  if (!lines) { tip.hidden = true; return; }
+  tip.replaceChildren(); lines.forEach((l, i) => { const d = document.createElement('div'); if (i === 0) d.className = 't'; d.textContent = l; tip.appendChild(d); });
+  tip.hidden = false; const r = root.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  let left = x - r.left + 14, top = y - r.top + 14; if (left + w > r.width) left = x - r.left - w - 14; if (top + h > r.height) top = y - r.top - h - 14;
+  tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, top) + 'px'; };
+window.sgFilter = (rows, p) => rows.filter((r) => { const y = Number(r.year);
+  if (p.period === '2014-2019' && !(y >= 2014 && y <= 2019)) return false;
+  if (p.period === '2020-2025' && !(y >= 2020 && y <= 2025)) return false;
+  if (p.period === '2026' && y !== 2026) return false;
+  if (p.country && r.country !== p.country) return false;
+  if (p.virus && r.virus !== p.virus) return false;
+  if (p.status && r.status !== p.status) return false; return true; });
+window.sgFiltered = () => { const p = dash.params(); return p.period === 'all' && !p.country && !p.virus && !p.status; };
+</script>
+
+<script>
+// filters
+const seg = (id, key) => { const el = document.getElementById(id);
+  el.addEventListener('click', (e) => { const b = e.target.closest('button[data-v]'); if (b) dash.setParams({ [key]: b.dataset.v }); });
+  return () => el.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String((dash.params()[key] ?? '') === b.dataset.v))); };
+const syncV = seg('virus', 'virus'), syncP = seg('period', 'period'), syncS = seg('status', 'status');
+const selC = document.getElementById('f-country'), q = document.getElementById('f-q');
+selC.addEventListener('change', () => dash.setParams({ country: selC.value }));
+q.addEventListener('input', () => dash.setParams({ q: q.value }));
+document.getElementById('reset').addEventListener('click', () => dash.resetParams());
+const fbar = document.getElementById('explore'), setFh = () => document.getElementById('sg').style.setProperty('--fh', (fbar.offsetHeight + 8) + 'px');
+new ResizeObserver(setFh).observe(fbar); setFh();
+dash.onData(() => {
+  const o = dash.data('outbreaks'), p = dash.params(); syncV(); syncP(); syncS();
+  const rows = o.status === 'ok' ? o.data : [];
+  selC.replaceChildren(new Option('All countries', ''), ...[...new Set(rows.map((r) => r.country))].sort().map((v) => new Option(v, v))); selC.value = p.country ?? '';
+  if (q !== document.activeElement) q.value = p.q ?? '';
+  const n = sgFilter(rows, p).length; document.getElementById('count').textContent = n + (n === 1 ? ' outbreak location' : ' outbreak locations');
+});
+</script>
+
+<script>
+// travel restrictions, with the flag of the country that imposed each measure
+const FLAG = { 'Saudi Arabia': 'sa', 'United States': 'us', 'Canada': 'ca', 'United Arab Emirates': 'ae', 'Kuwait': 'kw', 'Rwanda': 'rw', 'Lebanon': 'lb', 'Taiwan': 'tw', 'Mauritius': 'mu', 'Uganda': 'ug', 'Jordan': 'jo', 'Bahrain': 'bh' };
+dash.onData(() => {
+  const tb = document.getElementById('t-travel'), tr = dash.data('travel'); if (!tb || tr.status !== 'ok') return;
+  const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmtD = (d) => { const p = d.split('-'); const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][Number(p[1]) - 1]; return (p[2] ? Number(p[2]) + ' ' : '') + m + ' ' + p[0]; };
+  tb.innerHTML = tr.data.map((r) => { const f = FLAG[r.imposer];
+    return `<tr><td>${f ? `<img class="flag" src="img/flags/${f}.svg" alt="">` : ''}${esc(r.imposer)}<span class="st">${esc(r.status)}<span class="sg-show-n">, since ${fmtD(r.date)}</span></span></td><td><span class="af">${esc(r.affected)}</span>${esc(r.measure)}. <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.source)}</a></td><td class="sg-hide-n" style="white-space:nowrap">${fmtD(r.date)}</td></tr>`; }).join('');
+});
+
+// header, current outbreak and summary
+dash.onData(() => {
+  const o = dash.data('outbreaks'), t = dash.data('timeline_2026'), set = (id, v) => { document.getElementById(id).textContent = v; };
+  const last = t.status === 'ok' ? t.data.slice().sort((a, b) => a.day < b.day ? -1 : 1).pop() : null;
+  if (last) { set('lede-drc', fmt(Number(last.cases))); set('t-cases', fmt(Number(last.cases)) + ' (DR Congo)'); set('t-deaths', fmt(Number(last.deaths))); set('t-cfr', pct(Number(last.deaths) / Number(last.cases))); }
+  if (o.status !== 'ok') return;
+  const ken = o.data.find((r) => r.id === 'ken26'); if (ken) set('lede-ken', fmt(Number(ken.cases)));
+  const r26 = o.data.filter((r) => Number(r.year) === 2026);
+  set('t-prov', String(r26.filter((r) => r.country === 'DR Congo').length));
+  set('t-ctry', [...new Set(r26.map((r) => r.country))].join(', '));
+  const all = o.data, sel = sgFilter(all, dash.params()), sum = (rs, k) => d3.sum(rs, (r) => Number(r[k]));
+  const C = sum(sel, 'cases'), Dd = sum(sel, 'deaths'), CA = sum(all, 'cases'), DA = sum(all, 'deaths'), f = !sgFiltered();
+  set('k-scope', f ? 'For the outbreaks in your selection' : 'All outbreaks since 2014');
+  set('k-cases', fmt(C)); set('k-cases-s', f ? pct(CA ? C / CA : 0) + ' of all ' + fmt(CA) : 'since 2014');
+  set('k-deaths', fmt(Dd)); set('k-deaths-s', f ? pct(DA ? Dd / DA : 0) + ' of all ' + fmt(DA) : 'since 2014');
+  set('k-cfr', C ? pct(Dd / C) : '—');
+  const ctry = new Set(sel.map((r) => r.country)); set('k-locs', fmt(sel.length)); set('k-locs-s', 'in ' + ctry.size + (ctry.size === 1 ? ' country' : ' countries'));
+});
+</script>
+
+<script>
+// 2026 growth: two lines, labelled at their ends
+dash.onData(() => {
+  const box = document.getElementById('c-growth'), t = dash.data('timeline_2026'); box.replaceChildren(); if (t.status !== 'ok') return;
+  const rows = t.data.map((r) => ({ day: new Date(r.day + 'T00:00:00Z'), cases: Number(r.cases), deaths: toN(r.deaths), source: r.source }));
+  const W = box.clientWidth || 600, H = 240, RM = 96, svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img').attr('aria-label', 'Line chart of cumulative confirmed cases and deaths in DR Congo in 2026');
+  const y = d3.scaleLinear([0, d3.max(rows, (r) => r.cases) * 1.05], [H - 22, 8]).nice(), ticks = y.ticks(5);
+  const tt = svg.append('g').selectAll('text').data(ticks).join('text').attr('x', 0).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('fill', '#5c6878').attr('font-size', 12).text((d) => d3.format('~s')(d));
+  const ml = d3.max(tt.nodes(), (n) => n.getComputedTextLength()) + 10, x = d3.scaleUtc([rows[0].day, rows[rows.length - 1].day], [ml, W - RM]);
+  svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', ml).attr('x2', W - RM).attr('y1', (d) => y(d)).attr('y2', (d) => y(d)).attr('stroke', d3.color('#d9dfe6')).attr('stroke-width', (d) => d === 0 ? 1 : 0.6);
+  svg.append('path').attr('d', d3.line().x((r) => x(r.day)).y((r) => y(r.cases))(rows)).attr('fill', 'none').attr('stroke', VC.Bundibugyo).attr('stroke-width', 2);
+  const dr = rows.filter((r) => r.deaths !== null);
+  svg.append('path').attr('d', d3.line().x((r) => x(r.day)).y((r) => y(r.deaths))(dr)).attr('fill', 'none').attr('stroke', '#1a2230').attr('stroke-width', 1.6).attr('stroke-dasharray', '4 3');
+  svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (r) => x(r.day)).attr('cy', (r) => y(r.cases)).attr('r', 3.2).attr('fill', '#fff').attr('stroke', VC.Bundibugyo).attr('stroke-width', 1.6)
+    .on('mousemove', (e, r) => sgTip([d3.utcFormat('%b %-d, %Y')(r.day), fmt(r.cases) + ' cases', r.deaths !== null ? fmt(r.deaths) + ' deaths' : 'deaths not reported', r.source], e.clientX, e.clientY)).on('mouseleave', () => sgTip(null));
+  const lc = rows[rows.length - 1], ld = dr[dr.length - 1];
+  svg.append('text').attr('x', x(lc.day) + 8).attr('y', y(lc.cases)).attr('dy', '0.32em').attr('font-size', 13).attr('font-weight', 600).attr('fill', '#a34500').text(fmt(lc.cases) + ' cases');
+  svg.append('text').attr('x', x(ld.day) + 8).attr('y', y(ld.deaths)).attr('dy', '0.32em').attr('font-size', 13).attr('font-weight', 600).attr('fill', '#1a2230').text(fmt(ld.deaths) + ' deaths');
+  svg.append('g').selectAll('text').data(x.ticks(W < 480 ? 3 : 6)).join('text').attr('x', (d) => x(d)).attr('y', H - 4).attr('text-anchor', 'middle').attr('fill', '#5c6878').attr('font-size', 12).text((d) => d3.utcFormat('%b')(d));
+});
+</script>
+
+<script>
+// dot map of Africa: circles coloured by virus, filled when active, hollow when declared over
+dash.onData(() => {
+  const box = document.getElementById('c-map'), o = dash.data('outbreaks'), g = dash.data('africa_grid'); box.replaceChildren();
+  if (o.status !== 'ok' || g.status !== 'ok') return;
+  const p = dash.params(), sel = sgFilter(o.data, p), hot = new Set(sel.map((r) => r.country));
+  document.getElementById('c-where-n').textContent = sel.length + (sel.length === 1 ? ' outbreak location' : ' outbreak locations') + ' in your selection';
+  const W = box.clientWidth || 520, L0 = -18.5, L1 = 52, T0 = 38, T1 = -35.5, H = Math.round(W * (T0 - T1) / (L1 - L0));
+  const x = d3.scaleLinear([L0, L1], [0, W]), y = d3.scaleLinear([T0, T1], [0, H]);
+  const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'group').attr('aria-label', 'Map of outbreak locations');
+  svg.append('g').attr('aria-hidden', 'true').selectAll('circle').data(g.data).join('circle').attr('cx', (d) => x(Number(d.lon))).attr('cy', (d) => y(Number(d.lat))).attr('r', Math.max(1.1, (W / (L1 - L0)) * 0.3))
+    .attr('fill', (d) => hot.has(d.country) ? '#7c8a9a' : '#c9d1da').attr('fill-opacity', (d) => hot.has(d.country) ? 0.9 : 0.6);
+  const bd = dash.data('africa_borders');
+  if (bd.status === 'ok') { const gp = d3.geoPath(d3.geoTransform({ point(lon, lat) { this.stream.point(x(lon), y(lat)); } }));
+    svg.append('g').attr('aria-hidden', 'true').selectAll('path').data(bd.data).join('path').attr('d', gp).attr('fill', 'none').attr('stroke', '#1a2230').attr('stroke-opacity', 0.35).attr('stroke-width', 0.7).attr('stroke-linejoin', 'round'); }
+  const rs = d3.scaleSqrt([0, d3.max(o.data, (r) => Number(r.cases))], [0, Math.min(40, W * 0.075)]), sites = sel.slice().sort((a, b) => Number(b.cases) - Number(a.cases));
+  const pick = (r) => dash.setParams({ country: p.country === r.country ? '' : r.country });
+  svg.append('g').selectAll('circle').data(sites).join('circle').attr('class', 'site').attr('tabindex', 0).attr('role', 'button')
+    .attr('aria-label', (r) => `${r.location}, ${r.country}, ${r.virus}, ${r.status === 'Over' ? 'declared over' : 'active'}, ${fmt(Number(r.cases))} cases. Select to filter by ${r.country}.`)
+    .attr('cx', (r) => x(Number(r.lon))).attr('cy', (r) => y(Number(r.lat))).attr('r', (r) => Math.max(3.5, rs(Number(r.cases))))
+    .attr('fill', (r) => r.status === 'Active' ? VC[r.virus] : '#fff').attr('fill-opacity', (r) => r.status === 'Active' ? 0.85 : 0.55)
+    .attr('stroke', (r) => r.status === 'Active' ? '#fff' : VC[r.virus]).attr('stroke-width', 1.6)
+    .on('mousemove', (e, r) => sgTip([r.location + ', ' + r.country, r.period + ' · ' + r.virus + ' · ' + (r.status === 'Over' ? 'declared over' : 'active'), fmt(Number(r.cases)) + ' cases · ' + fmt(Number(r.deaths)) + ' deaths'], e.clientX, e.clientY))
+    .on('mouseleave', () => sgTip(null)).on('click', (e, r) => { sgTip(null); pick(r); })
+    .on('keydown', (e, r) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(r); } });
+  // label the largest sites, moving a label down when it would overlap one already placed
+  const placed = [], lab = svg.append('g').attr('aria-hidden', 'true');
+  sites.filter((r) => Number(r.cases) >= 1000).slice(0, 5).forEach((r) => {
+    const txt = (r.location.startsWith('Nationwide') ? r.country : r.location) + ' ' + fmt(Number(r.cases)), w = txt.length * 6.6, h = 15, rad = Math.max(3.5, rs(Number(r.cases)));
+    let cx = x(Number(r.lon)) + rad * 0.7 + 4, cy = y(Number(r.lat)), end = false;
+    if (cx + w > W - 2) { cx = x(Number(r.lon)) - rad * 0.7 - 4; end = true; }
+    const bx = end ? cx - w : cx; while (placed.some((b) => bx < b.x + b.w && bx + w > b.x && cy - h / 2 < b.y + b.h && cy + h / 2 > b.y)) cy += h;
+    placed.push({ x: bx, y: cy - h / 2, w, h });
+    lab.append('text').attr('x', cx).attr('y', cy).attr('text-anchor', end ? 'end' : 'start').attr('dy', '0.32em').attr('font-size', 12.5).attr('font-weight', 500).attr('fill', '#1a2230')
+      .attr('stroke', '#fff').attr('stroke-width', 3).attr('paint-order', 'stroke').text(txt); });
+});
+</script>
+
+<script>
+// cases by start year: bars on a linear scale, stacked by virus
+dash.onData(() => {
+  const box = document.getElementById('c-years'), o = dash.data('outbreaks'); box.replaceChildren(); if (o.status !== 'ok') return;
+  const p = dash.params(), sel = sgFilter(o.data, { ...p, period: 'all' }), years = d3.range(2014, 2027), viruses = ['Zaire', 'Sudan', 'Bundibugyo'];
+  const by = d3.rollup(sel, (v) => d3.sum(v, (r) => Number(r.cases)), (r) => Number(r.year), (r) => r.virus);
+  const tot = (yv) => d3.sum(viruses, (v) => (by.get(yv) || new Map()).get(v) || 0);
+  const inP = (yv) => !p.period || p.period === 'all' || (p.period === '2014-2019' && yv <= 2019) || (p.period === '2020-2025' && yv >= 2020 && yv <= 2025) || (p.period === '2026' && yv === 2026);
+  document.getElementById('c-years-n').textContent = fmt(d3.sum(years.filter(inP), tot)) + ' confirmed cases in the selected period, by the year each outbreak began';
+  const W = box.clientWidth || 800, H = 200, xb = d3.scaleBand(years, [0, W]).paddingInner(0.3).paddingOuter(0.1), ym = d3.max(years, tot) || 1;
+  const y = d3.scaleLinear([0, ym], [H - 22, 18]), svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img').attr('aria-label', 'Bar chart of confirmed cases by the year each outbreak began');
+  years.forEach((yv) => { const bw = Math.min(34, xb.bandwidth()), x0 = xb(yv) + (xb.bandwidth() - bw) / 2, g = svg.append('g'), m = by.get(yv) || new Map(); let acc = 0;
+    g.append('rect').attr('x', xb(yv)).attr('y', 0).attr('width', xb.bandwidth()).attr('height', H - 22).attr('fill', 'transparent')
+      .on('mousemove', (e) => sgTip([String(yv), fmt(tot(yv)) + ' cases in outbreaks that began this year', ...viruses.filter((v) => m.get(v)).map((v) => v + ': ' + fmt(m.get(v)))], e.clientX, e.clientY)).on('mouseleave', () => sgTip(null));
+    viruses.forEach((v) => { const c = m.get(v) || 0; if (!c) return;
+      g.append('rect').attr('x', x0).attr('y', y(acc + c)).attr('width', bw).attr('height', Math.max(1, y(acc) - y(acc + c))).attr('pointer-events', 'none').attr('fill', VC[v]).attr('fill-opacity', inP(yv) ? 1 : 0.25); acc += c; });
+    if (acc > 0) g.append('text').attr('x', xb(yv) + xb.bandwidth() / 2).attr('y', y(acc) - 5).attr('text-anchor', 'middle').attr('fill', '#1a2230').attr('font-size', 12).text(W < 560 ? d3.format('.2~s')(acc) : fmt(acc));
+    g.append('text').attr('x', xb(yv) + xb.bandwidth() / 2).attr('y', H - 4).attr('text-anchor', 'middle').attr('fill', '#5c6878').attr('font-size', 12).text(W < 560 ? "'" + String(yv).slice(2) : String(yv)); });
+  svg.append('line').attr('x1', 0).attr('x2', W).attr('y1', H - 22).attr('y2', H - 22).attr('stroke', '#1a2230');
+});
+</script>
+
+<script>
+// outbreak locations table
+const tbody = document.querySelector('#t-out tbody');
+document.querySelector('#t-out thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-sort]'); if (!b) return; const k = b.dataset.sort;
+  sgState.dir = sgState.sort === k ? -sgState.dir : (['location', 'country', 'virus', 'status', 'source'].includes(k) ? 1 : -1); sgState.sort = k; dash.setParams({ _sort: k + ':' + sgState.dir }); });
+tbody.addEventListener('click', (e) => { const tr = e.target.closest('tr[data-key]'); if (!tr || e.target.closest('a')) return; const c = tr.dataset.country; dash.setParams({ country: dash.params().country === c ? '' : c }); });
+dash.onData(() => {
+  const o = dash.data('outbreaks'), cf = dash.data('cfr'); tbody.replaceChildren(); if (o.status !== 'ok') return;
+  const p = dash.params(), cfr = new Map(cf.data.map((r) => [r.id, r.cfr])), qq = (p.q || '').trim().toLowerCase();
+  const rows = sgFilter(o.data, p).filter((r) => !qq || (r.location + ' ' + r.country + ' ' + r.virus).toLowerCase().includes(qq));
+  const k = sgState.sort, dir = sgState.dir, val = (r) => k === 'cfr' ? cfr.get(r.id) : (['cases', 'deaths', 'year'].includes(k) ? Number(r[k]) : String(r[k]));
+  rows.sort((a, b) => { const va = val(a), vb = val(b); return (va > vb ? 1 : va < vb ? -1 : 0) * dir; });
+  document.querySelectorAll('#t-out th').forEach((th) => { const b = th.querySelector('button'); th.setAttribute('aria-sort', b && b.dataset.sort === k ? (dir > 0 ? 'ascending' : 'descending') : 'none'); });
+  document.getElementById('t-count').textContent = rows.length + ' of ' + o.data.length + ' locations, following the filters above. Select a row to filter by its country.';
+  rows.forEach((r) => { const tr = document.createElement('tr'); tr.dataset.key = r.id; tr.dataset.country = r.country; if (p.country && p.country === r.country) tr.classList.add('sel');
+    const td = (text, cls) => { const c = document.createElement('td'); if (cls) c.className = cls; c.textContent = text; tr.appendChild(c); return c; };
+    td(r.location); td(r.country); td(r.period);
+    const vc = td('', 'sg-hide-n'), vs = document.createElement('span'); vs.className = 'sg-vir'; vs.innerHTML = `<i class="sw ${r.virus}"></i>`; vs.appendChild(document.createTextNode(r.virus)); vc.appendChild(vs);
+    td(r.status === 'Over' ? 'Declared over' : 'Active', r.status === 'Active' ? 'sg-act' : '');
+    td(fmt(Number(r.cases)), 'sg-num'); td(fmt(Number(r.deaths)), 'sg-num'); const c = cfr.get(r.id); td(c == null ? '—' : pct(c), 'sg-num'); td(r.source, 'sg-hide-n'); tbody.appendChild(tr); });
+});
+</script>
+
+</div></body></html>
