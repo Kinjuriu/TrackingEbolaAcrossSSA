@@ -222,7 +222,11 @@ import os
 VIMG = {}
 for key in ("zaire", "sudan", "bundibugyo"):
     f = P("media", "virus", f"{key}.jpg")
-    if os.path.exists(f): VIMG[key] = "data:image/jpeg;base64," + base64.b64encode(open(f, "rb").read()).decode()
+    if os.path.exists(f):
+        from PIL import Image as _Iv
+        os.makedirs(P("docs", "img"), exist_ok=True)
+        _Iv.open(f).convert("RGB").resize((208, 208)).save(P("docs", "img", "virus-" + key + ".webp"), "WEBP", quality=82, method=6)
+        VIMG[key] = "img/virus-" + key + ".webp"
 VNAME = {"zaire": "Zaire ebolavirus", "sudan": "Sudan virus", "bundibugyo": "Bundibugyo virus"}
 VCRED = {"zaire": ("NIAID via Wikimedia Commons", "https://commons.wikimedia.org/wiki/File:Ebola_Virus_-_Electron_Micrograph.tiff"),
          "sudan": ("NIAID on Unsplash", "https://unsplash.com/photos/mR-2J-e7Z5I"),
@@ -235,7 +239,7 @@ def virus_of(t):
 def fig(t):
     v = virus_of(t)
     if not v or v not in VIMG: return ""
-    return f'<figure class="vimg"><span class="vball vb-{v}" role="img" aria-label="Coloured electron micrograph of Ebola virus particles"></span><figcaption>{VNAME[v]}<a href="{VCRED[v][1]}" target="_blank" rel="noopener">Image: {VCRED[v][0]}</a></figcaption></figure>'
+    return f'<figure class="vimg"><img class="vball" src="{VIMG[v]}" width="104" height="104" loading="lazy" alt="Coloured electron micrograph of Ebola virus particles"><figcaption>{VNAME[v]}<a href="{VCRED[v][1]}" target="_blank" rel="noopener">Image: {VCRED[v][0]}</a></figcaption></figure>'
 steps = [(t, cls, k, h, fig(t) + body) for t, cls, k, h, body in steps]
 def _step(t, cls, k, h, body):
     c = (" " + cls) if cls else ""
@@ -271,8 +275,7 @@ for f in files:
     _Im.open(f"{CON if f in ('bluemarble.jpg', 'blackmarble.jpg') else TER}/{f}").convert("RGB").save(f"{TEXDIR}/{w}", "WEBP", quality=80, method=6)
     texmap[f] = "tex/" + w
 html = open(P("scripts", "scroll_template.html")).read()
-vcss = "".join(f".vb-{k}{{background-image:url({u})}}" for k, u in VIMG.items())
-html = html.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", open(P("scripts", "dashband.html")).read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
+html = html.replace("__DASHBAND__", open(P("scripts", "dashband.html")).read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
 DATA["tex"] = texmap
 open(os.path.join(DATADIR, "story.json"), "w").write(json.dumps(DATA, ensure_ascii=False, separators=(",", ":")))
 # preload the data and the first chapter's tiles so they download alongside three.js
@@ -282,3 +285,6 @@ pre += ['<link rel="preload" as="image" href="%s" crossorigin="anonymous">' % u 
 html = html.replace("__PRELOAD__", "\n".join(pre))
 open(P("docs", "index.html"), "w").write(html)
 print("wrote docs/index.html", len(html), "bytes")
+import sys
+if "--no-stills" not in sys.argv:
+    sys.path.insert(0, P("scripts")); import shoot_stills; shoot_stills.main()

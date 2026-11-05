@@ -10,7 +10,9 @@
 <meta property="og:type" content="article">
 __PRELOAD__
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap">
+<link rel="preload" as="image" href="img/poster-wide.webp" media="(min-aspect-ratio: 1/1)">
+<link rel="preload" as="image" href="img/poster-tall.webp" media="(max-aspect-ratio: 1/1)">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap">
 <style>
 /* Layout: a scroll story. A 3D map on real satellite ground stays pinned to the screen while short
    chapter cards scroll over it; each chapter flies the camera and raises the spikes. Committed dark look. */
@@ -25,15 +27,20 @@ __PRELOAD__
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased}
 .scrolly{position:relative}
-.stage{position:sticky;top:0;height:100vh;height:100svh;width:100%;overflow:hidden;background:#05080a}
-.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage{position:sticky;top:0;height:100vh;height:100svh;width:100%;overflow:hidden;background:#05080a url(img/poster-wide.webp) center/cover no-repeat}
+@media (max-aspect-ratio:1/1){.stage{background-image:url(img/poster-tall.webp)}}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;visibility:hidden}
+.stage.ready canvas{visibility:visible}
+.stage:not(.ready) .ov{visibility:hidden}
+/* ?poster: only the map, for shoot_stills.py */
+.poster .steps,.poster .ov,.poster .readout,.poster .loc,.poster .credit,.poster .loadnote,.poster .dashband,.poster .after{display:none!important}
 .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(125% 100% at 60% 45%,rgba(0,0,0,0) 52%,rgba(0,0,0,.55) 100%)}
 .ov{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 
 .readout{position:absolute;top:max(18px,env(safe-area-inset-top,0px));right:max(18px,env(safe-area-inset-right,0px));text-align:right;pointer-events:none}
 .r-date{font-size:clamp(12px,1.5vw,17px);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#f6f7f3;text-shadow:0 1px 8px rgba(0,0,0,.85)}
-.r-cases{font-size:clamp(18px,2.6vw,32px);font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--amber);font-variant-numeric:tabular-nums;text-shadow:0 1px 10px rgba(0,0,0,.85)}
+.r-cases{font-size:clamp(18px,2.6vw,32px);font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--amber);font-variant-numeric:tabular-nums;text-shadow:0 1px 10px rgba(0,0,0,.85)}
 .r-deaths{font-size:clamp(11px,1.25vw,14px);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--red);font-variant-numeric:tabular-nums;text-shadow:0 1px 8px rgba(0,0,0,.9)}
 
 .clab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;line-height:1.15;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff;
@@ -79,8 +86,7 @@ svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .cmp b{font-size:22px;font-weight:600;color:var(--amber);font-variant-numeric:tabular-nums}
 .cmp em{display:block;font-size:12px;color:var(--faint);margin-top:4px}
 .vimg{float:right;width:104px;margin:2px 0 8px 16px;text-align:center}
-.vimg .vball{display:block;width:104px;height:104px;border-radius:50%;background-size:cover;background-position:center}
-__VIMGCSS__
+.vimg .vball{display:block;width:104px;height:104px;border-radius:50%;object-fit:cover}
 .vimg figcaption{font-size:10.5px;font-style:italic;font-weight:300;color:var(--muted);margin-top:6px;line-height:1.3}
 .vimg figcaption a{display:block;font-style:normal;font-size:9.5px;color:var(--faint);text-decoration:underline;text-underline-offset:2px;margin-top:2px}
 @media (max-width:700px){.vimg{width:72px;margin-left:12px}.vimg .vball{width:72px;height:72px}}
@@ -147,7 +153,8 @@ __SOURCES__
 <script>
 (function(){
 // ?record is for the film renderer: it keeps the drawing buffer for screenshots and loads every tile up front
-const RECORD = new URLSearchParams(location.search).has("record");
+const RECORD = new URLSearchParams(location.search).has("record"), POSTER = new URLSearchParams(location.search).has("poster");
+if(POSTER) document.documentElement.classList.add("poster");
 const get = (f, kind) => fetch("data/"+f).then(r => { if(!r.ok) throw new Error(f+" "+r.status); return r[kind](); });
 Promise.all([get("story.json","json"), get("height_det.bin","arrayBuffer"), get("height_cont.bin","arrayBuffer"), get("vectors.bin","arrayBuffer")])
   .then(([D, hd, hc, vb]) => start(D, new Uint8Array(hd), new Uint8Array(hc), new Int16Array(vb)))
@@ -403,7 +410,7 @@ function loop(now){ raf=0; const dt=last?Math.min(0.1,(now-last)/1000):1/60; let
     if(Math.abs(tg-nt)>1e-4){ T=nt; moving=true; needsRender=true; } else if(T!==tg){ T=tg; needsRender=true; } }
   if(needsRender){ needsRender=false; frame(T); pump(); }
   if(moving){ last=now; kick(); } else last=0; }
-let T=targetT();
+let T=targetT(); if(POSTER){ manual=true; T=0; }
 new ResizeObserver(()=>{ resize(); kick(); }).observe(stage);
 addEventListener("scroll", kick, {passive:true});
 resize(); frame(T); pump();

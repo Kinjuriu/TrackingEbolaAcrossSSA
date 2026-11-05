@@ -12,7 +12,6 @@ body{padding-block:max(14px,env(safe-area-inset-top,0px)) 28px;padding-left:max(
 .nav a{color:#0461da;text-decoration:underline;text-underline-offset:2px}
 .dash-skeleton{color:transparent!important}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head><body>
 <nav class="nav"><a href="./">&larr; The story</a><a href="./film.html">The film</a><a href="https://github.com/Kinjuriu/TrackingEbolaAcrossSSA">Code &amp; data</a></nav>
 <div id="dash-root">
@@ -257,6 +256,7 @@ body[data-virus=Zaire]{background:#e4efe0} body[data-virus=Sudan]{background:#f1
   </main>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
 window.fmt = d3.format(','); window.pct = d3.format('.1%');
 window.toN = (v) => (v === null || v === undefined || v === '') ? null : Number(v);
