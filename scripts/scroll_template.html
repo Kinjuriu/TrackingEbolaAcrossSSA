@@ -8,7 +8,7 @@
 <meta property="og:description" content="Twelve years of Ebola outbreaks on satellite imagery, from Sierra Leone to Nairobi.">
 <meta property="og:image" content="https://kinjuriu.github.io/TrackingEbolaAcrossSSA/film-cover.jpg">
 <meta property="og:type" content="article">
-<link rel="preload" as="image" href="tex/bluemarble.webp" crossorigin="anonymous">
+__PRELOAD__
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap">
 <style>
@@ -146,8 +146,20 @@ __SOURCES__
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
-const D = __DATA__;
-const TEX = __TEXMAP__;
+// ?record is for the film renderer: it keeps the drawing buffer for screenshots and loads every tile up front
+const RECORD = new URLSearchParams(location.search).has("record");
+const get = (f, kind) => fetch("data/"+f).then(r => { if(!r.ok) throw new Error(f+" "+r.status); return r[kind](); });
+Promise.all([get("story.json","json"), get("height_det.bin","arrayBuffer"), get("height_cont.bin","arrayBuffer"), get("vectors.bin","arrayBuffer")])
+  .then(([D, hd, hc, vb]) => start(D, new Uint8Array(hd), new Uint8Array(hc), new Int16Array(vb)))
+  .catch(e => { const n=document.getElementById("loadnote"); if(n) n.textContent="The map could not load. The story text below still works."; console.error(e); });
+
+function start(D, HD, HC, VB){
+const TEX = D.tex;
+// map lines arrive as 16-bit integers in the order listed in D.vecIndex
+let vo=0; const vlines = lens => lens.map(n => { const a=new Array(n*2); for(let i=0;i<n*2;i++) a[i]=VB[vo++]/D.vecQ; return a; });
+const VEC = {rivers:vlines(D.vecIndex.rivers), borders:vlines(D.vecIndex.borders), countries:{}, prov:{}};
+for(const k in D.vecIndex.countries) VEC.countries[k]=vlines(D.vecIndex.countries[k]);
+for(const k in D.vecIndex.prov) VEC.prov[k]=vlines(D.vecIndex.prov[k]);
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const fmt = n => Math.round(n).toLocaleString("en-US");
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
@@ -160,10 +172,10 @@ function keyVal(keys, t, ease){
 }
 
 /* ---------- height sampling (detail region and whole continent) ---------- */
-function grid(g){ const b=Uint8Array.from(atob(g.b64), c=>c.charCodeAt(0)); const [L0,L1,A0,A1]=g.bounds, [W,H]=g.grid, gp=g.gp;
+function grid(g, b){ const [L0,L1,A0,A1]=g.bounds, [W,H]=g.grid, gp=g.gp;
   return (lon,lat)=>{ const fx=clamp((lon-L0)*gp,0,W-1), fy=clamp((A1-lat)*gp,0,H-1); const x0=Math.floor(fx), y0=Math.floor(fy), x1=Math.min(x0+1,W-1), y1=Math.min(y0+1,H-1), u=fx-x0, v=fy-y0;
     return ((b[y0*W+x0]*(1-u)+b[y0*W+x1]*u)*(1-v)+(b[y1*W+x0]*(1-u)+b[y1*W+x1]*u)*v)*g.hscale*0.0003; }; }
-const hDet = grid(D.det), hCon = grid(D.cont);
+const hDet = grid(D.det, HD), hCon = grid(D.cont, HC);
 const [DL0,DL1,DA0,DA1] = D.det.bounds;
 const inDet = (lon,lat)=> lon>DL0+0.05 && lon<DL1-0.05 && lat>DA0+0.05 && lat<DA1-0.05;
 const hAt = (lon,lat)=> inDet(lon,lat) ? hDet(lon,lat) : hCon(lon,lat)*0.92;
@@ -172,7 +184,7 @@ const X = lon => lon-LONC, Z = lat => -(lat-LATC);
 
 /* ---------- renderer ---------- */
 const stage=document.getElementById("stage"), canvas=document.getElementById("gl");
-const renderer=new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:true});
+const renderer=new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:RECORD});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.setClearColor(0x05080a,1);
 const scene=new THREE.Scene(); scene.fog=new THREE.Fog(0x05080a,10,40);
@@ -185,18 +197,27 @@ function plane(b, gp, hfn, yoff){
   for(let i=0;i<p.count;i++){ const lon=cx+p.getX(i), lat=cz-p.getZ(i); p.setXYZ(i, X(lon), hfn(lon,lat)+yoff, Z(lat)); }
   return g;
 }
-let texLoaded=0; const texTotal=Object.keys(TEX).length;
-function tex(name){ const t=loader.load(TEX[name], ()=>{ needsRender=true; texLoaded++; if(texLoaded>=Math.min(6,texTotal)){ const n=document.getElementById("loadnote"); if(n) n.style.display="none"; } }); t.anisotropy=aniso; t.minFilter=THREE.LinearMipmapLinearFilter; return t; }
-// whole continent: Blue Marble with Black Marble over it
+function tex(name, done){ const t=loader.load(TEX[name], ()=>{ needsRender=true; done(t); kick(); }); t.anisotropy=aniso; t.minFilter=THREE.LinearMipmapLinearFilter; return t; }
+// whole continent: Blue Marble with Black Marble over it; Black Marble is fetched only near the night chapter
+let blueReady=false, blackReady=false;
 const contGeo = plane(D.cont.bounds, D.cont.gp, (lo,la)=>hCon(lo,la)*0.92, -0.05);
-const blueMat = new THREE.MeshBasicMaterial({map:tex("bluemarble.jpg")});
-const blackMat = new THREE.MeshBasicMaterial({map:tex("blackmarble.jpg"), transparent:true, opacity:0, depthWrite:false});
+const blueMat = new THREE.MeshBasicMaterial({map:tex("bluemarble.jpg", ()=>{ blueReady=true; })});
+const blackMat = new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false});
 scene.add(new THREE.Mesh(contGeo, blueMat));
-const blackMesh = new THREE.Mesh(contGeo, blackMat); blackMesh.renderOrder=1; scene.add(blackMesh);
-// sharp Sentinel-2 chunks over the story region
-const chunkMats=[];
-D.chunks.forEach(ch=>{ const m=new THREE.MeshBasicMaterial({map:tex(ch.f), transparent:true, opacity:1}); chunkMats.push(m);
-  const mesh=new THREE.Mesh(plane(ch.b, D.det.gp, hDet, 0), m); mesh.renderOrder=2; scene.add(mesh); });
+const blackMesh = new THREE.Mesh(contGeo, blackMat); blackMesh.renderOrder=1; blackMesh.visible=false; scene.add(blackMesh);
+function loadBlack(){ if(blackMat.map) return; blackMat.map=tex("blackmarble.jpg", ()=>{ blackReady=true; }); blackMat.needsUpdate=true; }
+// sharp Sentinel-2 tiles over the story region, fetched up to AHEAD story steps before the camera needs them;
+// each tile's terrain is built only when its image arrives, so nothing heavy runs before the first frame
+const AHEAD=3, chunkMats=[], chunkState=D.chunks.map(()=>0); let inflight=0;
+function loadChunk(i){ const ch=D.chunks[i]; chunkState[i]=1; inflight++;
+  tex(ch.f, t=>{ inflight--; chunkState[i]=2; const m=new THREE.MeshBasicMaterial({map:t, transparent:true, opacity:1}); chunkMats.push(m);
+    const mesh=new THREE.Mesh(plane(ch.b, D.det.gp, hDet, 0), m); mesh.renderOrder=2; scene.add(mesh); pump(); }); }
+function pump(){ for(let i=0;i<D.chunks.length && inflight<4;i++){ const n=D.chunks[i].need; if(!chunkState[i] && (RECORD || (n!=null && n<=T+AHEAD))) loadChunk(i); }
+  if(RECORD || T>=D.night[0]-4) loadBlack(); checkReady(); }
+let shown=false, allDone; window.__storyReady=new Promise(r=>allDone=r);
+function checkReady(){ if(!blueReady) return;
+  if(!shown && D.chunks.every((c,i)=>c.need==null || c.need>T+0.5 || chunkState[i]===2)){ shown=true; document.getElementById("loadnote").hidden=true; stage.classList.add("ready"); }
+  if(blackReady && chunkState.every(s=>s===2)) allDone(); }
 
 /* ---------- vectors draped on the ground ---------- */
 function densify(arr, step){ const pts=[]; for(let i=0;i+3<arr.length;i+=2){ const a=[arr[i],arr[i+1]], b=[arr[i+2],arr[i+3]], n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/step));
@@ -213,11 +234,11 @@ function ribbon(lines, width, color, lift, dash){ const pos=[], idx=[]; let base
     base+=pts.length*2; });
   const g=new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx);
   const m=new THREE.Mesh(g, new THREE.MeshBasicMaterial({color, transparent:true, opacity:0, depthWrite:false, side:THREE.DoubleSide})); m.renderOrder=4; m.visible=false; scene.add(m); return m; }
-const rivers = lineLayer(D.vec.rivers, 0x9cc3d6, 0.35, 0.012);
-const borders = lineLayer(D.vec.borders, 0xffffff, 0.42, 0.016);
+const rivers = lineLayer(VEC.rivers, 0x9cc3d6, 0.35, 0.012);
+const borders = lineLayer(VEC.borders, 0xffffff, 0.42, 0.016);
 const outlines = {};
 function outline(key, color){ const id=key+"|"+color; if(outlines[id]) return outlines[id];
-  const src = key.startsWith("C:") ? D.vec.countries[key.slice(2)] : D.vec.prov[key];
+  const src = key.startsWith("C:") ? VEC.countries[key.slice(2)] : VEC.prov[key];
   outlines[id] = ribbon(src||[], key.startsWith("C:")?0.07:0.045, color==="over"?0xd8dfda:(color==="prov"?0xffd08a:0xffffff), 0.024); return outlines[id]; }
 // Kenya case route
 const routeMesh = ribbon([D.route.flatMap(p=>[p[1],p[2]])], 0.045, 0xf4f0e6, 0.03, true);
@@ -316,7 +337,7 @@ function frame(t){
   const d=placeCamera(t), vals={}, w=stage.clientWidth, h=stage.clientHeight;
   const pull=ramp(t,D.pull[0],D.pull[1]), night=ramp(t,D.night[0],D.night[1]);
   chunkMats.forEach(m=>{ m.opacity=1-pull; m.visible=pull<0.999; });
-  blackMat.opacity=night; rivers.material.opacity=0.35*(1-pull); borders.material.opacity=0.42*(1-pull)+0.22*pull;
+  blackMat.opacity=night; blackMesh.visible=blackReady&&night>0; rivers.material.opacity=0.35*(1-pull); borders.material.opacity=0.42*(1-pull)+0.22*pull;
   const sscale=1+ (D.pullScale-1)*smooth(pull);
   S.forEach(s=>{ const c=Math.max(0,keyVal(s.keys,t,s.ease)); vals[s.id]=c;
     const over = s.overT!=null ? ramp(t,s.overT,s.overT+0.8) : 0;
@@ -374,13 +395,20 @@ const steps=[...document.querySelectorAll(".step")].map(el=>({el, t:+el.dataset.
 function targetT(){ const mid=window.innerHeight*0.55; const c=steps.map(s=>{ const r=s.el.getBoundingClientRect(); return r.top+r.height/2; });
   if(mid<=c[0]) return steps[0].t; for(let i=0;i<c.length-1;i++){ if(mid<c[i+1]){ const u=clamp((mid-c[i])/(c[i+1]-c[i]),0,1); return steps[i].t+(steps[i+1].t-steps[i].t)*u; } } return steps[steps.length-1].t; }
 function resize(){ const w=stage.clientWidth, h=stage.clientHeight; if(!w||!h) return; aspect=w/h; renderer.setSize(w,h,false); camera.aspect=aspect; camera.updateProjectionMatrix(); needsRender=true; }
-new ResizeObserver(resize).observe(stage);
-let T=targetT(), manual=false, last=performance.now();
-function loop(now){ const dt=Math.min(0.1,(now-last)/1000); last=now;
-  if(!manual){ const tg=targetT(); const nt = reduce ? tg : T+(tg-T)*Math.min(1,dt*5); if(Math.abs(nt-T)>1e-4){ T=nt; needsRender=true; } }
-  if(needsRender){ frame(T); needsRender=false; } requestAnimationFrame(loop); }
-resize(); frame(T); requestAnimationFrame(loop);
+// the loop runs only while the story is catching up with the scroll position or something new has loaded
+let raf=0, last=0, manual=false;
+function kick(){ if(!raf) raf=requestAnimationFrame(loop); }
+function loop(now){ raf=0; const dt=last?Math.min(0.1,(now-last)/1000):1/60; let moving=false;
+  if(!manual){ const tg=targetT(), nt=reduce?tg:T+(tg-T)*Math.min(1,dt*5);
+    if(Math.abs(tg-nt)>1e-4){ T=nt; moving=true; needsRender=true; } else if(T!==tg){ T=tg; needsRender=true; } }
+  if(needsRender){ needsRender=false; frame(T); pump(); }
+  if(moving){ last=now; kick(); } else last=0; }
+let T=targetT();
+new ResizeObserver(()=>{ resize(); kick(); }).observe(stage);
+addEventListener("scroll", kick, {passive:true});
+resize(); frame(T); pump();
 window.__renderAt=(t)=>{ manual=true; T=t; resize(); frame(T); };
 window.__storyEnd=D.end;
+}
 })();
 </script>

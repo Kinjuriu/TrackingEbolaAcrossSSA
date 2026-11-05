@@ -129,10 +129,47 @@ for f in afr["features"]:
     g = f["geometry"]; polys = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
     locc.append({"name": f["properties"]["name"], "rings": [[round(v, 1) for p in poly[0][::2] for v in p] for poly in polys if len(poly[0]) > 4]})
 
+# data files the page fetches next to the HTML: elevation as raw bytes, map lines as 16-bit integers
+import struct
+DATADIR = P("docs", "data"); os.makedirs(DATADIR, exist_ok=True)
+open(os.path.join(DATADIR, "height_det.bin"), "wb").write(base64.b64decode(open(f"{TER}/height.b64").read()))
+open(os.path.join(DATADIR, "height_cont.bin"), "wb").write(base64.b64decode(open(f"{CON}/cont_height.b64").read()))
+VQ = 400  # coordinates stored as round(degrees * 400), about 280 m
+vec_pts, vec_index = [], {}
+def vec_lines(lines):
+    lens = []
+    for l in lines:
+        vec_pts.extend(int(round(v*VQ)) for v in l); lens.append(len(l)//2)
+    return lens
+vec_index["rivers"] = vec_lines(vec["rivers"]); vec_index["borders"] = vec_lines(vec["borders"])
+vec_index["countries"] = {k: vec_lines(v) for k, v in vec["countries"].items()}
+vec_index["prov"] = {k: vec_lines(v) for k, v in vec["prov"].items()}
+open(os.path.join(DATADIR, "vectors.bin"), "wb").write(struct.pack("<%dh" % len(vec_pts), *vec_pts))
+
+# the story position at which each satellite tile is first seen close up, so the page can fetch tiles a chapter ahead
+def cam_at(t):
+    k = cam
+    if t <= k[0][0]: return k[0]
+    for a, b in zip(k, k[1:]):
+        if t <= b[0]:
+            u = (t-a[0])/(b[0]-a[0]); u = u*u*(3-2*u)
+            return [t] + [a[j]+(b[j]-a[j])*u for j in (1, 2)] + [math.exp(math.log(a[3])+(math.log(b[3])-math.log(a[3]))*u)]
+    return k[-1]
+def chunk_need(b):
+    t = 0.0
+    while t < 28.2:  # after this the camera pulls back to the whole continent and the tiles fade out
+        _, lon, lat, d = cam_at(t)[:4]
+        if d <= 26:  # further out, Blue Marble underneath (about 36 pixels per degree) is sharp enough
+            hw, hh = d*0.6 + 1, d*0.45 + 1
+            if b[0] < lon+hw and b[1] > lon-hw and b[2] < lat+hh and b[3] > lat-hh: return round(t, 2)
+        t += 0.1
+    return None
+
 DATA = dict(
-  det=dict(bounds=dims["bounds"], grid=dims["grid"], gp=dims["gp"], hscale=dims["hscale"], b64=open(f"{TER}/height.b64").read()),
-  cont=dict(bounds=cd["bounds"], grid=cd["grid"], gp=cd["gp"], hscale=cd["hscale"], b64=open(f"{CON}/cont_height.b64").read()),
-  chunks=[{"b": c["b"], "f": c["f"]} for c in dims["chunks"]], vec=vec, spikes=spikes, phases=phases, outlines=O, callouts=callouts, cam=cam,
+  det=dict(bounds=dims["bounds"], grid=dims["grid"], gp=dims["gp"], hscale=dims["hscale"]),
+  cont=dict(bounds=cd["bounds"], grid=cd["grid"], gp=cd["gp"], hscale=cd["hscale"]),
+  chunks=sorted([{"b": c["b"], "f": c["f"], "need": chunk_need(c["b"])} for c in dims["chunks"]], key=lambda c: 99 if c["need"] is None else c["need"]),
+  vecIndex=vec_index, vecQ=VQ, spikes=spikes, phases=phases, outlines=O, callouts=callouts, cam=cam,
   route=route, routeT=[24.8, 25.8, 28.2], countryLabels=cl, provLabels=pl, loc={"bounds": [-19, 53, -36, 38], "countries": locc},
   dayMap=dayMap, kenDeaths=[[25.6,0],[25.8,1],[27.0,1],[27.4,2]], drcCases=drc_cases, drcDeaths=drc_deaths, uga=[[0,0],[1,2],[48,20]], ugaDeaths=[[0,0],[20,2]],
   march=[["Gu\u00e9ck\u00e9dou",-10.1,8.6,"2014",1],["Beni",29.47,0.49,"2018"],["Mubende",31.39,0.56,"2022"],["Bulape",21.8,-4.6,"2025",1],["Bunia",30.25,1.56,"2026"],["Nairobi",36.82,-1.29,"2026"]],
@@ -236,6 +273,12 @@ for f in files:
 html = open(P("scripts", "scroll_template.html")).read()
 vcss = "".join(f".vb-{k}{{background-image:url({u})}}" for k, u in VIMG.items())
 html = html.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", open(P("scripts", "dashband.html")).read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
-html = html.replace("__DATA__", json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))).replace("__TEXMAP__", json.dumps(texmap, separators=(",", ":")))
+DATA["tex"] = texmap
+open(os.path.join(DATADIR, "story.json"), "w").write(json.dumps(DATA, ensure_ascii=False, separators=(",", ":")))
+# preload the data and the first chapter's tiles so they download alongside three.js
+first = [texmap[c["f"]] for c in DATA["chunks"] if c["need"] is not None and c["need"] <= 0.5]
+pre = ['<link rel="preload" as="fetch" href="data/%s" crossorigin="anonymous">' % f for f in ("story.json", "height_det.bin", "height_cont.bin", "vectors.bin")]
+pre += ['<link rel="preload" as="image" href="%s" crossorigin="anonymous">' % u for u in [texmap["bluemarble.jpg"]] + first]
+html = html.replace("__PRELOAD__", "\n".join(pre))
 open(P("docs", "index.html"), "w").write(html)
 print("wrote docs/index.html", len(html), "bytes")

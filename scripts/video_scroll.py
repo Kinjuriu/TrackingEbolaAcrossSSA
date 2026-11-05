@@ -1,8 +1,11 @@
-import asyncio, os, subprocess, json
+import asyncio, os, subprocess, json, threading, functools, http.server
 from playwright.async_api import async_playwright
 exec(open("/home/claude/render/shoot.py").read().split("body=open")[0])
-body=open("/home/claude/ebola-scroll.html").read()
-open("/home/claude/render/scroll.html","w").write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>'+body+'</body></html>')
+# the story fetches its data and tiles, so serve docs/ over http rather than opening a file:// URL
+DOCS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
+srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(http.server.SimpleHTTPRequestHandler, directory=DOCS))
+threading.Thread(target=srv.serve_forever, daemon=True).start()
+STORY = "http://127.0.0.1:%d/index.html?record" % srv.server_address[1]
 FPS,W,H=25,1600,900
 HOLD,MOVE=2.2,2.0           # seconds held on each card, seconds moving to the next
 os.makedirs("vframes",exist_ok=True)
@@ -18,7 +21,9 @@ async def run():
             if "localfonts" in u: return await r.fulfill(body=fontfile(u.rsplit('/',1)[1]), content_type="font/woff2")
             return await r.continue_()
         await pg.route("**/*", route)
-        await pg.goto("file:///home/claude/render/scroll.html"); await pg.add_style_tag(content=".after{display:none!important}"); await pg.wait_for_timeout(7000)
+        await pg.goto(STORY); await pg.add_style_tag(content=".after{display:none!important}")
+        # ?record loads every tile up front and resolves window.__storyReady when all of them are in
+        await pg.wait_for_function("window.__storyReady !== undefined", timeout=60000); await pg.evaluate("window.__storyReady"); await pg.wait_for_timeout(500)
         steps=await pg.evaluate("""[...document.querySelectorAll('.step')].map(s=>{const r=s.getBoundingClientRect(); return {t:+s.dataset.t, c:r.top+window.scrollY+r.height/2};})""")
         # timeline: hold on each step, then glide to the next (story time and scroll move together)
         seq=[]
