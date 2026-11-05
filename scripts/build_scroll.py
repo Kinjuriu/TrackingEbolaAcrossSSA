@@ -279,9 +279,9 @@ html = html.replace("__DASHBAND__", open(P("scripts", "dashband.html")).read()).
 DATA["tex"] = texmap
 open(os.path.join(DATADIR, "story.json"), "w").write(json.dumps(DATA, ensure_ascii=False, separators=(",", ":")))
 # preload the data and the first chapter's tiles so they download alongside three.js
-first = [texmap[c["f"]] for c in DATA["chunks"] if c["need"] is not None and c["need"] <= 0.5]
 pre = ['<link rel="preload" as="fetch" href="data/%s" crossorigin="anonymous">' % f for f in ("story.json", "height_det.bin", "height_cont.bin", "vectors.bin")]
-pre += ['<link rel="preload" as="image" href="%s" crossorigin="anonymous">' % u for u in [texmap["bluemarble.jpg"]] + first]
+# preload only Blue Marble: on slow links the sharp tiles must not compete with the data the live map needs first
+pre += ['<link rel="preload" as="image" href="%s" crossorigin="anonymous">' % texmap["bluemarble.jpg"]]
 html = html.replace("__PRELOAD__", "\n".join(pre))
 open(P("docs", "index.html"), "w").write(html)
 print("wrote docs/index.html", len(html), "bytes")

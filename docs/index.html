@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="image" href="img/poster-wide.webp" media="(min-aspect-ratio: 1/1)">
 <link rel="preload" as="image" href="img/poster-tall.webp" media="(max-aspect-ratio: 1/1)">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap">
 <style>
 /* Layout: a scroll story. A 3D map on real satellite ground stays pinned to the screen while short
    chapter cards scroll over it; each chapter flies the camera and raises the spikes. Committed dark look. */
@@ -44,7 +44,7 @@ svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 
 .readout{position:absolute;top:max(18px,env(safe-area-inset-top,0px));right:max(18px,env(safe-area-inset-right,0px));text-align:right;pointer-events:none}
 .r-date{font-size:clamp(12px,1.5vw,17px);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#f6f7f3;text-shadow:0 1px 8px rgba(0,0,0,.85)}
-.r-cases{font-size:clamp(18px,2.6vw,32px);font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--amber);font-variant-numeric:tabular-nums;text-shadow:0 1px 10px rgba(0,0,0,.85)}
+.r-cases{font-size:clamp(18px,2.6vw,32px);font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--amber);font-variant-numeric:tabular-nums;text-shadow:0 1px 10px rgba(0,0,0,.85)}
 .r-deaths{font-size:clamp(11px,1.25vw,14px);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--red);font-variant-numeric:tabular-nums;text-shadow:0 1px 8px rgba(0,0,0,.9)}
 
 .clab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;line-height:1.15;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff;
@@ -97,6 +97,12 @@ svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .hero h1{font-size:clamp(28px,4.4vw,48px);font-weight:500;line-height:1.04;margin:0 0 10px;letter-spacing:-.01em}
 .scrollcue{display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:16px}
 .scrollcue svg{display:block}
+/* opening box: no frame or rounded corners, virus key as plain swatches, cue in sentence case */
+.card.hero{border:0;border-radius:0;padding:24px 26px;max-width:450px}
+.card.hero .tag{border:0;padding:0;margin:4px 14px 0 0;font-size:12.5px;letter-spacing:0;color:#dfe4de;white-space:nowrap}
+.card.hero .tag::before{content:"";display:inline-block;width:9px;height:9px;margin-right:7px;vertical-align:0}
+.card.hero .tag.z::before{background:#dcab55} .card.hero .tag.s::before{background:#a0c8ff} .card.hero .tag.b::before{background:#ef6b52}
+.card.hero .scrollcue{font-size:13px;letter-spacing:0;text-transform:none;gap:6px}
 @media (max-width:700px){
   .step{align-items:flex-end;padding-bottom:6vh}
   .card{max-width:none;width:100%;padding:16px 18px}
@@ -280,9 +286,11 @@ function loadChunk(i){ const ch=D.chunks[i]; chunkState[i]=1; inflight++;
     const mesh=new THREE.Mesh(plane(ch.b, D.det.gp, hDet, 0), m); mesh.renderOrder=2; scene.add(mesh); pump(); }); }
 function pump(){ for(let i=0;i<D.chunks.length && inflight<4;i++){ const n=D.chunks[i].need; if(!chunkState[i] && (RECORD || (n!=null && n<=T+AHEAD))) loadChunk(i); }
   if(RECORD || T>=D.night[0]-4) loadBlack(); checkReady(); }
-let shown=false, allDone; window.__storyReady=new Promise(r=>allDone=r);
+// the live map replaces the still once this view's tiles are in, or after 1.5 s with Blue Marble while they stream in
+let shown=false, allDone, waited=false; window.__storyReady=new Promise(r=>allDone=r);
+setTimeout(()=>{ waited=true; checkReady(); kick(); }, 1500);
 function checkReady(){ if(!blueReady) return;
-  if(!shown && D.chunks.every((c,i)=>c.need==null || c.need>T+0.5 || chunkState[i]===2)){ shown=true; document.getElementById("loadnote").hidden=true; stage.classList.add("ready"); }
+  if(!shown && (waited || D.chunks.every((c,i)=>c.need==null || c.need>T+0.5 || chunkState[i]===2))){ shown=true; document.getElementById("loadnote").hidden=true; stage.classList.add("ready"); }
   if(blackReady && chunkState.every(s=>s===2)) allDone(); }
 
 /* ---------- vectors draped on the ground ---------- */
