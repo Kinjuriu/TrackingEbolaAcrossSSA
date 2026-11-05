@@ -1,0 +1,277 @@
+[
+{
+"NAME": "Ethiopia",
+"LABEL_X": 39.0886,
+"LABEL_Y": 8.032795
+},
+{
+"NAME": "S. Sudan",
+"LABEL_X": 30.390151,
+"LABEL_Y": 7.230477
+},
+{
+"NAME": "Somalia",
+"LABEL_X": 45.19238,
+"LABEL_Y": 3.568925
+},
+{
+"NAME": "Kenya",
+"LABEL_X": 37.907632,
+"LABEL_Y": 0.549043
+},
+{
+"NAME": "Malawi",
+"LABEL_X": 33.608082,
+"LABEL_Y": -13.386737
+},
+{
+"NAME": "Tanzania",
+"LABEL_X": 34.959183,
+"LABEL_Y": -6.051866
+},
+{
+"NAME": "Somaliland",
+"LABEL_X": 46.731595,
+"LABEL_Y": 9.443889
+},
+{
+"NAME": "Morocco",
+"LABEL_X": -7.187296,
+"LABEL_Y": 31.650723
+},
+{
+"NAME": "W. Sahara",
+"LABEL_X": -12.630304,
+"LABEL_Y": 23.967592
+},
+{
+"NAME": "Congo",
+"LABEL_X": 15.9005,
+"LABEL_Y": 0.142331
+},
+{
+"NAME": "Dem. Rep. Congo",
+"LABEL_X": 23.458829,
+"LABEL_Y": -1.858167
+},
+{
+"NAME": "Namibia",
+"LABEL_X": 17.108166,
+"LABEL_Y": -20.575298
+},
+{
+"NAME": "South Africa",
+"LABEL_X": 23.665734,
+"LABEL_Y": -29.708776
+},
+{
+"NAME": "Libya",
+"LABEL_X": 18.011015,
+"LABEL_Y": 26.638944
+},
+{
+"NAME": "Tunisia",
+"LABEL_X": 9.007881,
+"LABEL_Y": 33.687263
+},
+{
+"NAME": "Zambia",
+"LABEL_X": 26.395298,
+"LABEL_Y": -14.660804
+},
+{
+"NAME": "Sierra Leone",
+"LABEL_X": -11.763677,
+"LABEL_Y": 8.617449
+},
+{
+"NAME": "Guinea",
+"LABEL_X": -10.016402,
+"LABEL_Y": 10.618516
+},
+{
+"NAME": "Liberia",
+"LABEL_X": -9.460379,
+"LABEL_Y": 6.447177
+},
+{
+"NAME": "Central African Rep.",
+"LABEL_X": 20.906897,
+"LABEL_Y": 6.989681
+},
+{
+"NAME": "Sudan",
+"LABEL_X": 29.260657,
+"LABEL_Y": 16.330746
+},
+{
+"NAME": "Djibouti",
+"LABEL_X": 42.498825,
+"LABEL_Y": 11.976343
+},
+{
+"NAME": "Eritrea",
+"LABEL_X": 38.285566,
+"LABEL_Y": 15.787401
+},
+{
+"NAME": "Côte d'Ivoire",
+"LABEL_X": -5.568618,
+"LABEL_Y": 7.49139
+},
+{
+"NAME": "Mali",
+"LABEL_X": -2.038455,
+"LABEL_Y": 18.692713
+},
+{
+"NAME": "Senegal",
+"LABEL_X": -14.778586,
+"LABEL_Y": 15.138125
+},
+{
+"NAME": "Nigeria",
+"LABEL_X": 7.50322,
+"LABEL_Y": 9.439799
+},
+{
+"NAME": "Benin",
+"LABEL_X": 2.352018,
+"LABEL_Y": 10.324775
+},
+{
+"NAME": "Angola",
+"LABEL_X": 17.984249,
+"LABEL_Y": -12.182762
+},
+{
+"NAME": "Botswana",
+"LABEL_X": 24.179216,
+"LABEL_Y": -22.102634
+},
+{
+"NAME": "Zimbabwe",
+"LABEL_X": 29.925444,
+"LABEL_Y": -18.91164
+},
+{
+"NAME": "Chad",
+"LABEL_X": 18.645041,
+"LABEL_Y": 15.142959
+},
+{
+"NAME": "Algeria",
+"LABEL_X": 2.808241,
+"LABEL_Y": 27.397406
+},
+{
+"NAME": "Mozambique",
+"LABEL_X": 37.83789,
+"LABEL_Y": -13.94323
+},
+{
+"NAME": "eSwatini",
+"LABEL_X": 31.467264,
+"LABEL_Y": -26.533676
+},
+{
+"NAME": "Burundi",
+"LABEL_X": 29.917086,
+"LABEL_Y": -3.332836
+},
+{
+"NAME": "Rwanda",
+"LABEL_X": 30.103894,
+"LABEL_Y": -1.897196
+},
+{
+"NAME": "Uganda",
+"LABEL_X": 32.948555,
+"LABEL_Y": 1.972589
+},
+{
+"NAME": "Lesotho",
+"LABEL_X": 28.246639,
+"LABEL_Y": -29.480158
+},
+{
+"NAME": "Cameroon",
+"LABEL_X": 12.473488,
+"LABEL_Y": 4.585041
+},
+{
+"NAME": "Gabon",
+"LABEL_X": 11.835939,
+"LABEL_Y": -0.437739
+},
+{
+"NAME": "Niger",
+"LABEL_X": 9.504356,
+"LABEL_Y": 17.446195
+},
+{
+"NAME": "Burkina Faso",
+"LABEL_X": -1.36388,
+"LABEL_Y": 12.673048
+},
+{
+"NAME": "Togo",
+"LABEL_X": 1.058113,
+"LABEL_Y": 8.80722
+},
+{
+"NAME": "Ghana",
+"LABEL_X": -1.036941,
+"LABEL_Y": 7.717639
+},
+{
+"NAME": "Guinea-Bissau",
+"LABEL_X": -14.52413,
+"LABEL_Y": 12.163712
+},
+{
+"NAME": "Egypt",
+"LABEL_X": 29.445837,
+"LABEL_Y": 26.186173
+},
+{
+"NAME": "Mauritania",
+"LABEL_X": -9.740299,
+"LABEL_Y": 19.587062
+},
+{
+"NAME": "Eq. Guinea",
+"LABEL_X": 8.9902,
+"LABEL_Y": 2.333
+},
+{
+"NAME": "Gambia",
+"LABEL_X": -14.998318,
+"LABEL_Y": 13.641721
+},
+{
+"NAME": "Bir Tawil",
+"LABEL_X": 33.673428,
+"LABEL_Y": 21.860442
+},
+{
+"NAME": "Madagascar",
+"LABEL_X": 46.704241,
+"LABEL_Y": -18.628288
+},
+{
+"NAME": "Comoros",
+"LABEL_X": 43.318094,
+"LABEL_Y": -11.727683
+},
+{
+"NAME": "São Tomé and Principe",
+"LABEL_X": 7.021,
+"LABEL_Y": 0.9709
+},
+{
+"NAME": "Cabo Verde",
+"LABEL_X": -23.639434,
+"LABEL_Y": 15.074761
+}
+]

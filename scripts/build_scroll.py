@@ -1,7 +1,10 @@
-import json, base64, math
-T3 = "/home/claude/tex3"
-dims = json.load(open(f"{T3}/dims.json")); cd = json.load(open(f"{T3}/cont_dims.json"))
-vec = json.load(open(f"{T3}/vectors.json"))
+import json, base64, math, os
+# Run from anywhere: python3 scripts/build_scroll.py  (writes docs/index.html and docs/tex/*.webp)
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+def P(*a): return os.path.join(ROOT, *a)
+TER, CON = P("data", "terrain"), P("data", "continent")
+dims = json.load(open(f"{TER}/dims.json")); cd = json.load(open(f"{CON}/cont_dims.json"))
+vec = json.load(open(f"{TER}/vectors.json"))
 
 def lerp_keys(keys, x):
     if x <= keys[0][0]: return keys[0][1]
@@ -100,7 +103,7 @@ route = [["Buta",24.73,2.80,24.95],["Kisangani",25.19,0.52,25.1],["Beni",29.47,0
          ["Kampala",32.58,0.31,25.5],[None,32.46,0.05,None],["Nairobi",36.82,-1.29,25.75]]
 
 # country labels: Natural Earth label points for every African country
-ad = json.load(open("/home/claude/ne/ne_10m_admin_0_countries.geojson"))["features"]
+ad = [{"properties": dict(p, CONTINENT="Africa")} for p in json.load(open(P("data", "africa_label_points.json")))]
 story = {"Sierra Leone","Liberia","Guinea","DR Congo","Uganda","Kenya"}
 rename = {"Dem. Rep. Congo":"DR Congo","Central African Rep.":"Central African Rep.","S. Sudan":"South Sudan","Eq. Guinea":"Eq. Guinea","W. Sahara":None}
 cl = []
@@ -120,15 +123,15 @@ for k, name, dx, dy in [("COD:Ituri","Ituri Province",0.9,0.6),("COD:North Kivu"
                          ("UGA:Central Region","Central Region",0.2,-0.7),("KEN:Nairobi","Nairobi County",0,0.55),("COD:Upper Uele","Haut-Uélé",0,0.4)]:
     lon, lat = centroid(k, dx, dy); pl.append({"key": k, "name": name, "lon": lon, "lat": lat})
 
-afr = json.load(open("/tmp/claude-0/-home-claude/682b7276-4f53-5c14-ac7d-b6310ac269f9/scratchpad/africa.geo.json"))
+afr = json.load(open(P("data", "africa_locator.geo.json")))
 locc = []
 for f in afr["features"]:
     g = f["geometry"]; polys = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
     locc.append({"name": f["properties"]["name"], "rings": [[round(v, 1) for p in poly[0][::2] for v in p] for poly in polys if len(poly[0]) > 4]})
 
 DATA = dict(
-  det=dict(bounds=dims["bounds"], grid=dims["grid"], gp=dims["gp"], hscale=dims["hscale"], b64=open(f"{T3}/height.b64").read()),
-  cont=dict(bounds=cd["bounds"], grid=cd["grid"], gp=cd["gp"], hscale=cd["hscale"], b64=open(f"{T3}/cont_height.b64").read()),
+  det=dict(bounds=dims["bounds"], grid=dims["grid"], gp=dims["gp"], hscale=dims["hscale"], b64=open(f"{TER}/height.b64").read()),
+  cont=dict(bounds=cd["bounds"], grid=cd["grid"], gp=cd["gp"], hscale=cd["hscale"], b64=open(f"{CON}/cont_height.b64").read()),
   chunks=[{"b": c["b"], "f": c["f"]} for c in dims["chunks"]], vec=vec, spikes=spikes, phases=phases, outlines=O, callouts=callouts, cam=cam,
   route=route, routeT=[24.8, 25.8, 28.2], countryLabels=cl, provLabels=pl, loc={"bounds": [-19, 53, -36, 38], "countries": locc},
   dayMap=dayMap, kenDeaths=[[25.6,0],[25.8,1],[27.0,1],[27.4,2]], drcCases=drc_cases, drcDeaths=drc_deaths, uga=[[0,0],[1,2],[48,20]], ugaDeaths=[[0,0],[20,2]],
@@ -177,11 +180,11 @@ steps = [
  (END, "", "Africa at night", "<h2>Infrastructure and Transmission</h2>",
   "<p>NASA&rsquo;s Black Marble satellite imagery illuminates Africa&rsquo;s active urban centers and transportation networks at night. These connected transit routes facilitated the movement of the virus from eastern DR Congo to Nairobi in two days.</p><p>Behind the data, every spike on the map represents an impacted community.</p>"),
 ]
-# virus micrographs floated in each chapter card (files in /home/claude/virus/, credit NIAID)
+# virus micrographs floated in each chapter card (files in media/virus/, credit NIAID)
 import os
 VIMG = {}
 for key in ("zaire", "sudan", "bundibugyo"):
-    f = f"/home/claude/virus/{key}.jpg"
+    f = P("media", "virus", f"{key}.jpg")
     if os.path.exists(f): VIMG[key] = "data:image/jpeg;base64," + base64.b64encode(open(f, "rb").read()).decode()
 VNAME = {"zaire": "Zaire ebolavirus", "sudan": "Sudan virus", "bundibugyo": "Bundibugyo virus"}
 VCRED = {"zaire": ("NIAID via Wikimedia Commons", "https://commons.wikimedia.org/wiki/File:Ebola_Virus_-_Electron_Micrograph.tiff"),
@@ -197,7 +200,11 @@ def fig(t):
     if not v or v not in VIMG: return ""
     return f'<figure class="vimg"><span class="vball vb-{v}" role="img" aria-label="Coloured electron micrograph of Ebola virus particles"></span><figcaption>{VNAME[v]}<a href="{VCRED[v][1]}" target="_blank" rel="noopener">Image: {VCRED[v][0]}</a></figcaption></figure>'
 steps = [(t, cls, k, h, fig(t) + body) for t, cls, k, h, body in steps]
-step_html = "\n".join(f'    <section class="step{(" "+cls) if cls else ""}" data-t="{t}"><div class="card{(" "+cls) if cls else ""}">{f'<p class="k">{k}</p>' if k else ""}{h}{body}</div></section>' for t, cls, k, h, body in steps)
+def _step(t, cls, k, h, body):
+    c = (" " + cls) if cls else ""
+    kk = '<p class="k">' + k + '</p>' if k else ""
+    return '    <section class="step' + c + '" data-t="' + str(t) + '"><div class="card' + c + '">' + kk + h + body + '</div></section>'
+step_html = "\n".join(_step(*s_) for s_ in steps)
 src = [
  ('https://www.ecdc.europa.eu/en/ebola-outbreak-democratic-republic-congo-and-uganda', 'ECDC', 'DRC cases and deaths by province to 26 Oct 2026; national totals to 31 Oct from the DRC Ministry of Health via Reuters'),
  ('https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON615', 'WHO Disease Outbreak News', 'and WHO Africa weekly situation reports 21 and 22: 2026 milestones'),
@@ -220,35 +227,15 @@ src_html = "\n".join(f'        <li><a href="{u}" target="_blank" rel="noopener">
 files = [c["f"] for c in dims["chunks"]] + ["bluemarble.jpg", "blackmarble.jpg"]
 # textures ship as separate WebP files so the page text appears at once and images load in parallel and cache
 from PIL import Image as _Im
-TEXDIR = "/home/claude/repo2/docs/tex"; os.makedirs(TEXDIR, exist_ok=True)
+TEXDIR = P("docs", "tex"); os.makedirs(TEXDIR, exist_ok=True)
 texmap = {}
 for f in files:
     w = f.rsplit(".", 1)[0] + ".webp"
-    _Im.open(f"{T3}/{f}").convert("RGB").save(f"{TEXDIR}/{w}", "WEBP", quality=80, method=6)
+    _Im.open(f"{CON if f in ('bluemarble.jpg', 'blackmarble.jpg') else TER}/{f}").convert("RGB").save(f"{TEXDIR}/{w}", "WEBP", quality=80, method=6)
     texmap[f] = "tex/" + w
-html = open("/home/claude/scroll_template.html").read()
+html = open(P("scripts", "scroll_template.html")).read()
 vcss = "".join(f".vb-{k}{{background-image:url({u})}}" for k, u in VIMG.items())
-html = html.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", open("/home/claude/dashband_clean.html").read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
+html = html.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", open(P("scripts", "dashband.html")).read()).replace("__STEPS__", step_html).replace("__SOURCES__", src_html)
 html = html.replace("__DATA__", json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))).replace("__TEXMAP__", json.dumps(texmap, separators=(",", ":")))
-open("/home/claude/ebola-scroll.html", "w").write(html); open("/home/claude/repo2/docs/index.html", "w").write(html)
-# article page: the same scrolling map on top, the article below instead of the dashboard band
-import re as _re
-art = open("/home/claude/article_body.html").read()
-TITLE = "Ebola\u2019s journey from west to east: is it going to the rest of the world?"
-art_body = _re.sub(r'\s*<h1>.*?</h1>', '', art, count=1, flags=_re.S)
-faq = _re.findall(r'<details><summary>(.*?)</summary><p>(.*?)</p></details>', art, flags=_re.S)
-strip = lambda x: _re.sub(r'<[^>]+>', '', x).replace('&rsquo;', '\u2019')
-ld = {"@context": "https://schema.org", "@graph": [
-  {"@type": "Article", "headline": TITLE, "author": {"@type": "Person", "name": "Stephane Njoki"}, "datePublished": "2026-11-02", "image": "https://kinjuriu.github.io/TrackingEbolaAcrossSSA/film-cover.jpg"},
-  {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": strip(q), "acceptedAnswer": {"@type": "Answer", "text": strip(a_)}} for q, a_ in faq]}]}
-ahtml = open("/home/claude/scroll_template.html").read()
-ahtml = ahtml.replace("__VIMGCSS__", vcss).replace("__DASHBAND__", art_body)
-astep = step_html.replace("<h1>Ebola in Africa: 2014 to 2026</h1>", "<h1>" + TITLE.replace("\u2019", "&rsquo;") + "</h1>", 1)
-ahtml = ahtml.replace("__STEPS__", astep).replace("__SOURCES__", src_html)
-ahtml = ahtml.replace("__DATA__", json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))).replace("__TEXMAP__", json.dumps(texmap, separators=(",", ":")))
-ahtml = _re.sub(r"<title>.*?</title>", "<title>Is Ebola going to the rest of the world? Ebola\u2019s journey from west to east</title>", ahtml, count=1)
-ahtml = _re.sub(r'<meta name="description" content="[^"]*">', '<meta name="description" content="How Ebola spreads, how deadly the 2026 Bundibugyo outbreak is, and how likely it is to reach Europe, North America and the rest of the world, with a satellite map of every outbreak from 2014 to 2026.">', ahtml, count=1)
-ahtml = ahtml.replace('<meta property="og:type" content="article">', '<meta property="og:type" content="article">\n<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False) + '</script>', 1)
-open("/home/claude/article_draft.html", "w").write(ahtml)  # draft only, not published
-print("article.html", len(ahtml)//1024, "KB, FAQ items", len(faq))
-print("ebola-scroll.html", len(html)//1024, "KB")
+open(P("docs", "index.html"), "w").write(html)
+print("wrote docs/index.html", len(html), "bytes")
