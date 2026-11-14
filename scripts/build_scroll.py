@@ -13,11 +13,11 @@ def lerp_keys(keys, x):
     return keys[-1][1]
 
 # story position T for each 2026 outbreak day (day 0 = 15 May 2026)
-dayMap = [[16.8, 0], [17.6, 14], [18.6, 39], [19.6, 77], [20.5, 89], [21.4, 136], [22.2, 152], [22.6, 154], [26.2, 154], [27.4, 169], [40, 169]]
+dayMap = [[16.8, 0], [17.6, 14], [18.6, 39], [19.6, 77], [20.5, 89], [21.4, 136], [22.2, 152], [22.6, 154], [26.2, 154], [27.4, 181], [40, 181]]
 def T_of_day(d): return lerp_keys([[b, a] for a, b in dayMap], d)
 
-drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[156,9552],[158,9704],[164,10141],[166,10274],[169,10351]]
-drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[156,4602],[158,4687],[164,4928],[166,4992],[169,5026]]
+drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[156,9552],[158,9704],[164,10141],[166,10274],[169,10351],[173,10741],[181,11197]]
+drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[156,4602],[158,4687],[164,4928],[166,4992],[169,5026],[173,5230],[181,5471]]
 ituri_share = [[0,1.0],[89,0.853],[152,0.7337]]
 oct14 = {"ituri":6806,"nkivu":1991,"haut":398,"tshopo":64,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":0}
 oct26 = {"ituri":7247,"nkivu":2345,"haut":442,"tshopo":86,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":3}
@@ -183,23 +183,23 @@ TZ, TS, TB = ("z", "Zaire ebolavirus"), ("s", "Sudan virus"), ("b", "Bundibugyo 
 ARROW = '<svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true"><path d="M7 1v19M1.5 14.5 7 20l5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
 steps = [
  (0, "hero", "", "<h1>Ebola in Africa: 2014 to 2026</h1>",
-  "<p>This data tracks the spread of Ebola across the African continent from Sierra Leone to Nairobi over a 12-year period. The map visualizes outbreaks place by place. Active outbreaks are marked by rising spikes that correspond to confirmed cases of the Zaire, Sudan, and Bundibugyo strains. Spikes turn grey when an outbreak is officially declared over.</p><p>" + tags(TZ, TS, TB) + '</p><div class="scrollcue">Scroll to begin' + ARROW + '</div>'),
+  "<p>This data tracks Ebola outbreaks across the African continent over a 12-year period, from the West African epidemic, which began in Guinea, to the cases in Nairobi in 2026; the disease itself was first recorded in 1976. The map visualizes outbreaks place by place. Active outbreaks are marked by rising spikes that correspond to confirmed cases of the Zaire, Sudan, and Bundibugyo viruses. Spikes turn grey when an outbreak is officially declared over.</p><p>" + tags(TZ, TS, TB) + '</p><div class="scrollcue">Scroll to begin' + ARROW + '</div>'),
  (2, "", "2014", "<h2>West Africa Epidemic</h2>",
-  "<p>The largest Ebola epidemic on record reached Sierra Leone in 2014. Driven by the Zaire ebolavirus, the country recorded <b>14,124 cases</b> and <b>3,956 deaths</b>. This marked the highest toll of any single nation during the crisis.</p><p>" + tags(TZ) + "</p>"),
+  "<p>The largest Ebola epidemic on record reached Sierra Leone in 2014. Driven by the Zaire ebolavirus, the country recorded <b>14,124 cases</b> and <b>3,956 deaths</b>. This was the highest number of cases of any single country in the epidemic, although Liberia recorded more deaths.</p><p>" + tags(TZ) + "</p>"),
  (4, "", "2014 to 2016", "<h2>The Regional Toll</h2>",
   "<p>The epidemic originated near Guéckédou, Guinea, and rapidly escalated into a national crisis across three neighboring countries. The data visualizes the national totals rather than provincial numbers. Guinea reported <b>3,814 cases</b> and Liberia reported <b>10,678 cases</b>. Combined with Sierra Leone, the regional outbreak resulted in a total of <b>28,616 cases</b> and <b>11,310 deaths</b>.</p>"),
  (6, "", "2016", "<h2>Outbreaks Contained</h2>",
   "<p>The World Health Organization declared the final flare-up over in Sierra Leone on <b>March 17, 2016</b>. Guinea followed on <b>June 1</b>, and Liberia on <b>June 9</b>, at which point the map spikes turn grey.</p><p>Health officials declare an outbreak over only after 42 consecutive days pass with no new cases. However, the virus is never fully eradicated because it remains endemic in animal populations.</p>"),
  (8, "", "2018 · Democratic Republic of the Congo", "<h2>Resurgence in the East</h2>",
-  "<p>Four years after the West African epidemic, the virus resurfaced in August 2018. This new outbreak emerged in the far eastern region of the Democratic Republic of the Congo, a vast nation divided into 26 provinces.</p>"),
+  "<p>In August 2018, after two smaller outbreaks elsewhere in the country in 2017 and May 2018, a new outbreak of the Zaire ebolavirus was declared in the far eastern region of the Democratic Republic of the Congo, a vast nation divided into 26 provinces.</p>"),
  (10, "", "2018 to 2020", "<h2>DR Congo Conflict Zone</h2>",
   "<p>The Zaire ebolavirus spread across North Kivu, Ituri, and South Kivu provinces. Operating within an active conflict zone, health workers recorded <b>3,470 cases</b> and <b>2,287 deaths</b>. The outbreak was officially declared over on <b>June 25, 2020</b>.</p><p>" + tags(TZ) + "</p>"),
  (12.5, "", "2022 and 2025", "<h2>Uganda Outbreaks</h2>",
-  "<p>Uganda faced outbreaks of the Sudan virus, a strain for which there is currently no licensed vaccine. In 2022, the virus caused <b>164 cases</b> in the Mubende District, with the outbreak declared over on January 11, 2023. A subsequent outbreak in Kampala caused <b>14 cases</b> in 2025 and was declared over on April 26, 2025.</p><p>" + tags(TS) + "</p>"),
+  "<p>Uganda faced outbreaks of the Sudan virus, a separate species of Ebola virus for which there is currently no licensed vaccine. In 2022, the virus caused <b>164 cases</b> and 55 confirmed deaths in the Mubende District, with the outbreak declared over on January 11, 2023. A subsequent outbreak in Kampala caused <b>14 cases</b> and 4 deaths in 2025 and was declared over on April 26, 2025.</p><p>" + tags(TS) + "</p>"),
  (15, "", "2025", "<h2>South-Central DR Congo</h2>",
-  "<p>A separate spillover event of the Zaire ebolavirus occurred in the Kasaï Province, distant from the eastern outbreaks. Centered around Bulape, this outbreak resulted in <b>64 cases</b> and <b>45 deaths</b> before being declared over in December 2025.</p><p>" + tags(TZ) + "</p>"),
- (17.6, "", "May 2026", "<h2>A New Strain in DR Congo</h2>",
-  "<p>On May 15, 2026, health officials in DR Congo confirmed an outbreak of the <b>Bundibugyo virus</b> in Ituri Province. Epidemiological data suggests the virus had been circulating undetected for several weeks. There is currently no approved vaccine for the Bundibugyo strain.</p><p>" + tags(TB) + "</p>"),
+  "<p>A separate spillover event of the Zaire ebolavirus occurred in the Kasaï Province, distant from the eastern outbreaks. Centered around Bulape, this outbreak resulted in <b>64 cases</b> and <b>45 deaths</b> before being declared over on December 1, 2025.</p><p>" + tags(TZ) + "</p>"),
+ (17.6, "", "May 2026", "<h2>Bundibugyo Virus in DR Congo</h2>",
+  "<p>On May 15, 2026, health officials in DR Congo confirmed an outbreak of the <b>Bundibugyo virus</b> in Ituri Province. Epidemiological data suggests the virus had been circulating undetected for several weeks. There is currently no approved vaccine for the Bundibugyo virus.</p><p>" + tags(TB) + "</p>"),
  (20.5, "", "August 2026", "<h2>Rapid Escalation</h2>",
   "<p>By August 12, the Bundibugyo outbreak reached <b>4,665 confirmed cases</b>, with 85 percent concentrated in Ituri. In approximately eleven weeks, the case count surpassed the total number of infections from the entire 2018 to 2020 epidemic, making it the second-largest Ebola outbreak on record.</p>"),
  (22.2, "", "October 2026", "<h2>Expansion Across Seven Provinces</h2>",
@@ -208,14 +208,14 @@ steps = [
   "<p>Uganda recorded <b>20 confirmed cases</b> of the Bundibugyo virus linked to the outbreak in neighboring DR Congo. Health authorities contained the spread and officially declared the Ugandan outbreak over in August 2026.</p><p>" + tags(TB) + "</p>"),
  (26.2, "", "October 2026", "<h2>Nairobi, Kenya</h2>",
   "<p>On October 3, a Kenyan national flew from Entebbe, Uganda, to Nairobi. The patient&rsquo;s travel history included transit from Buta in Bas-Uélé through Kisangani and Beni in DR Congo, before crossing the Ugandan border at Mpondwe. The patient died on October 5.</p><p>By October 16, Kenyan health officials confirmed <b>three cases</b> of the Bundibugyo virus, all directly linked to this initial patient.</p><p>" + tags(TB) + "</p>"),
- (27.4, "", "Late October 2026", "<h2>Kenya&rsquo;s Cluster Grows, and Nigeria Reports a Case</h2>",
+ (27.4, "", "October to November 2026", "<h2>Kenya&rsquo;s Cluster Grows, and Nigeria Reports a Case</h2>",
   "<p>Kenya&rsquo;s count rose to <b>nine confirmed cases</b>, all in one cluster linked to the first patient, including three health workers who treated him. On October 23, the Ministry of Health reported a <b>second death</b>, a 65-year-old woman who was a close relative of the first patient. WHO&rsquo;s report of the same day lists the same nine cases.</p>"
   "<p>On October 20, Nigeria confirmed an imported case in Abuja, a woman who had travelled from Uganda; she was later evacuated to Switzerland for care.</p>"
-  "<p>In DR Congo, the outbreak passed <b>10,000 confirmed cases</b>. By October 31, the Ministry of Health counted <b>10,351 cases</b> and <b>5,026 deaths</b>, across eight provinces after Nord-Ubangi recorded its first cases.</p><p>" + tags(TB) + "</p>"),
+  "<p>In DR Congo, the outbreak passed <b>10,000 confirmed cases</b> in October, across eight provinces after Nord-Ubangi recorded its first cases. By November 12, ECDC counted <b>11,197 cases</b> and <b>5,471 deaths</b>. Kenya reported its last case on October 20, and seven of its nine patients have recovered.</p><p>" + tags(TB) + "</p>"),
  (29.6, "", "2014 to 2026", "<h2>Continental Overview</h2>",
   "<p>Viewing the continent as a whole shows a clear eastward progression of active outbreaks. While the West African and Ugandan epidemics are resolved, the eastern DR Congo outbreak remains active, with a direct transmission link to Nairobi.</p><p>A dotted line connects each outbreak geographically in chronological order, from Guéckédou in 2014 to Nairobi in 2026. Most map points represent separate zoonotic transmission events from animals to humans; however, the 2026 path to Nairobi represents a single, continuous chain of human infection.</p><p>At this map scale, spike heights are calculated using the square root of total cases.</p>"),
  (END, "", "Africa at night", "<h2>Infrastructure and Transmission</h2>",
-  "<p>NASA&rsquo;s Black Marble satellite imagery illuminates Africa&rsquo;s active urban centers and transportation networks at night. These connected transit routes facilitated the movement of the virus from eastern DR Congo to Nairobi in two days.</p><p>Behind the data, every spike on the map represents an impacted community.</p>"),
+  "<p>NASA&rsquo;s Black Marble satellite imagery illuminates Africa&rsquo;s active urban centers and transportation networks at night. These connected transit routes facilitated the movement of the virus from eastern DR Congo to Nairobi.</p><p>Behind the data, every spike on the map represents an impacted community.</p>"),
 ]
 # virus micrographs floated in each chapter card (files in media/virus/, credit NIAID)
 import os

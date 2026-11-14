@@ -143,7 +143,7 @@ __DASHBAND__
       <h3>How this was made</h3>
       <p>A 3D spike map built in the browser with three.js. The ground is a cloud-free 2024 Sentinel-2 satellite mosaic in natural colour, sharpened over West Africa, eastern DR Congo, Kasa&iuml; and East Africa, and shaded with relief from an open elevation model. The whole-continent views use NASA&rsquo;s Blue Marble and Black Marble.</p>
       <p>Each spike&rsquo;s height is proportional to confirmed cases on one scale; in the whole-continent views spikes switch to a square-root scale so small outbreaks stay visible. West African spikes are national totals, one per country. 2026 spikes are province totals, placed on each province&rsquo;s main town; between reporting dates the curve, and each province&rsquo;s share of it, is interpolated.</p>
-      <p class="fine">2026 figures are confirmed cases and are provisional. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. Linked 2026 cases were also confirmed in France and Nigeria. Virus images are coloured electron micrographs of Ebola virus particles by NIAID, from Unsplash and Wikimedia Commons. The three ebolaviruses look alike under the microscope, so each image is matched to its virus by colour; none is a strain-specific photograph. Ebola is never eradicated, because the virus survives in animals; WHO declares an outbreak over after 42 days with no new cases.</p>
+      <p class="fine">2026 figures are confirmed cases and are provisional. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. Linked 2026 cases were also confirmed in France and Nigeria. Virus images are coloured electron micrographs of Ebola virus particles by NIAID, from Unsplash and Wikimedia Commons. The three ebolaviruses look alike under the microscope, so each image is matched to its virus by colour; none is a photograph of that particular virus. Ebola is never eradicated, because the virus survives in animals; WHO declares an outbreak over after 42 days with no new cases.</p>
     </div>
     <div>
       <h3>Sources</h3>
@@ -405,10 +405,12 @@ function frame(t){
   readout(t, vals);
 }
 
-/* ---------- scroll drives the story ---------- */
+/* ---------- scroll drives the story ----------
+   while a chapter card sits near the middle of the screen the story holds at that chapter's moment,
+   so the counter shows the same date and figures as the card; it moves on between cards */
 const steps=[...document.querySelectorAll(".step")].map(el=>({el, t:+el.dataset.t}));
 function targetT(){ const mid=window.innerHeight*0.55; const c=steps.map(s=>{ const r=s.el.getBoundingClientRect(); return r.top+r.height/2; });
-  if(mid<=c[0]) return steps[0].t; for(let i=0;i<c.length-1;i++){ if(mid<c[i+1]){ const u=clamp((mid-c[i])/(c[i+1]-c[i]),0,1); return steps[i].t+(steps[i+1].t-steps[i].t)*u; } } return steps[steps.length-1].t; }
+  if(mid<=c[0]) return steps[0].t; for(let i=0;i<c.length-1;i++){ if(mid<c[i+1]){ const u0=clamp((mid-c[i])/(c[i+1]-c[i]),0,1), u=clamp((u0-0.25)/0.5,0,1); return steps[i].t+(steps[i+1].t-steps[i].t)*u; } } return steps[steps.length-1].t; }
 function resize(){ const w=stage.clientWidth, h=stage.clientHeight; if(!w||!h) return; aspect=w/h; renderer.setSize(w,h,false); camera.aspect=aspect; camera.updateProjectionMatrix(); needsRender=true; }
 // the loop runs only while the story is catching up with the scroll position or something new has loaded
 let raf=0, last=0, manual=false;

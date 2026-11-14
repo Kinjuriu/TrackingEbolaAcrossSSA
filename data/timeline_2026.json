@@ -106,5 +106,17 @@
   "cases": 10351,
   "deaths": 5026,
   "source": "DRC Ministry of Health via Reuters, 31 Oct"
+ },
+ {
+  "day": "2026-11-04",
+  "cases": 10741,
+  "deaths": 5230,
+  "source": "ECDC, data to 4 Nov"
+ },
+ {
+  "day": "2026-11-12",
+  "cases": 11197,
+  "deaths": 5471,
+  "source": "ECDC, 12 Nov (data to 11 Nov)"
  }
 ]
