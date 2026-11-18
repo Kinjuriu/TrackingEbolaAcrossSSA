@@ -2,10 +2,10 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Ebola in Africa: 2014 to 2026, from Sierra Leone to Nairobi</title>
+<title>Ebola in Africa: 2014 to 2026</title>
 <meta name="description" content="A satellite-map data story tracking every Ebola outbreak in Africa from 2014 to 2026, from Sierra Leone to the 2026 Bundibugyo outbreak in DR Congo, Uganda, Kenya and Nigeria, with WHO, ECDC and CDC figures.">
 <meta property="og:title" content="Ebola in Africa: 2014 to 2026">
-<meta property="og:description" content="Twelve years of Ebola outbreaks on satellite imagery, from Sierra Leone to Nairobi.">
+<meta property="og:description" content="Every Ebola outbreak in Africa since 2014, mapped on satellite imagery.">
 <meta property="og:image" content="https://kinjuriu.github.io/TrackingEbolaAcrossSSA/film-cover.jpg">
 <meta property="og:type" content="article">
 __PRELOAD__
@@ -97,7 +97,7 @@ svg.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .card.hero{border:0;border-radius:0;padding:24px 26px;max-width:450px}
 .card.hero .tag{border:0;padding:0;margin:4px 14px 0 0;font-size:12.5px;letter-spacing:0;color:#dfe4de;white-space:nowrap}
 .card.hero .tag::before{content:"";display:inline-block;width:9px;height:9px;margin-right:7px;vertical-align:0}
-.card.hero .tag.z::before{background:#dcab55} .card.hero .tag.s::before{background:#a0c8ff} .card.hero .tag.b::before{background:#ef6b52}
+.card.hero .toplinks{display:flex;flex-wrap:wrap;gap:6px 20px;margin:2px 0 14px;font-size:15px;font-weight:500} .card.hero .toplinks a{color:#f1f3ef;text-decoration:underline;text-decoration-color:rgba(220,171,85,.75);text-underline-offset:3px} .card.hero .toplinks a:hover{text-decoration-color:#f0c97e} .card.hero .tag.z::before{background:#dcab55} .card.hero .tag.s::before{background:#a0c8ff} .card.hero .tag.b::before{background:#ef6b52}
 .card.hero .scrollcue{font-size:13px;letter-spacing:0;text-transform:none;gap:6px}
 @media (max-width:700px){
   .step{align-items:flex-end;padding-bottom:6vh}
@@ -143,14 +143,14 @@ __DASHBAND__
       <h3>How this was made</h3>
       <p>A 3D spike map built in the browser with three.js. The ground is a cloud-free 2024 Sentinel-2 satellite mosaic in natural colour, sharpened over West Africa, eastern DR Congo, Kasa&iuml; and East Africa, and shaded with relief from an open elevation model. The whole-continent views use NASA&rsquo;s Blue Marble and Black Marble.</p>
       <p>Each spike&rsquo;s height is proportional to confirmed cases on one scale; in the whole-continent views spikes switch to a square-root scale so small outbreaks stay visible. West African spikes are national totals, one per country. 2026 spikes are province totals, placed on each province&rsquo;s main town; between reporting dates the curve, and each province&rsquo;s share of it, is interpolated.</p>
-      <p class="fine">2026 figures are confirmed cases and are provisional. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. Linked 2026 cases were also confirmed in France and Nigeria. Virus images are coloured electron micrographs of Ebola virus particles by NIAID, from Unsplash and Wikimedia Commons. The three ebolaviruses look alike under the microscope, so each image is matched to its virus by colour; none is a photograph of that particular virus. Ebola is never eradicated, because the virus survives in animals; WHO declares an outbreak over after 42 days with no new cases.</p>
+      <p class="fine">2026 figures are confirmed cases and are provisional. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. One linked 2026 case, a humanitarian doctor who fell ill after returning to France in July, is not shown on the map. Virus images are coloured electron micrographs of Ebola virus particles by NIAID, from Unsplash and Wikimedia Commons. The three ebolaviruses look alike under the microscope, so each image is matched to its virus by colour; none is a photograph of that particular virus. Ebola is never eradicated, because the virus survives in animals; WHO declares an outbreak over after 42 days with no new cases.</p>
     </div>
     <div>
       <h3>Sources</h3>
       <ul>
 __SOURCES__
       </ul>
-      <p class="fine">Updated October 31, 2026.</p>
+      <p class="fine">Updated November 18, 2026.</p>
     </div>
   </div>
 </div>
@@ -164,7 +164,7 @@ if(POSTER) document.documentElement.classList.add("poster");
 const get = (f, kind) => fetch("data/"+f).then(r => { if(!r.ok) throw new Error(f+" "+r.status); return r[kind](); });
 Promise.all([get("story.json","json"), get("height_det.bin","arrayBuffer"), get("height_cont.bin","arrayBuffer"), get("vectors.bin","arrayBuffer")])
   .then(([D, hd, hc, vb]) => start(D, new Uint8Array(hd), new Uint8Array(hc), new Int16Array(vb)))
-  .catch(e => { const n=document.getElementById("loadnote"); if(n) n.textContent="The map could not load. The story text below still works."; console.error(e); });
+  .catch(e => { const n=document.getElementById("loadnote"); if(n) n.textContent="The map could not load. The storyboard text below still works."; console.error(e); });
 
 function start(D, HD, HC, VB){
 const TEX = D.tex;
@@ -273,25 +273,30 @@ const marchMesh=(()=>{ const pos=[], idx=[], wdt=0.32;
 const marchIdx=marchMesh.geometry.index.count, marchVerts=marchPts.length;
 
 /* ---------- spikes ---------- */
-const spikeMat=()=>new THREE.ShaderMaterial({ uniforms:{uAlpha:{value:1},uScar:{value:0}},
+// one colour per virus, the same hues as the virus key and the dashboard: Zaire amber, Sudan blue, Bundibugyo red
+const VKEY=v=>/Sudan/i.test(v)?"s":/Bundibugyo/i.test(v)?"b":"z";
+const VCOL={ z:{base:[0.88,0.43,0.08], tip:[1.0,0.87,0.5], glow:[1.0,0.62,0.18], ring:0xffc066, hex:"#dcab55"},
+             s:{base:[0.16,0.42,0.86], tip:[0.72,0.86,1.0], glow:[0.40,0.66,1.0], ring:0xa0c8ff, hex:"#a0c8ff"},
+             b:{base:[0.82,0.16,0.10], tip:[1.0,0.66,0.56], glow:[1.0,0.38,0.28], ring:0xff8a75, hex:"#ef6b52"} };
+const spikeMat=(c)=>new THREE.ShaderMaterial({ uniforms:{uAlpha:{value:1},uScar:{value:0},uBase:{value:new THREE.Vector3(...c.base)},uTip:{value:new THREE.Vector3(...c.tip)}},
   vertexShader:`varying float vH; varying vec3 vN; void main(){ vH=position.y; vN=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-  fragmentShader:`uniform float uAlpha; uniform float uScar; varying float vH; varying vec3 vN;
-    void main(){ vec3 base=vec3(0.88,0.43,0.08), tip=vec3(1.0,0.87,0.5), scar=vec3(0.62,0.66,0.64);
+  fragmentShader:`uniform float uAlpha; uniform float uScar; uniform vec3 uBase; uniform vec3 uTip; varying float vH; varying vec3 vN;
+    void main(){ vec3 base=uBase, tip=uTip, scar=vec3(0.62,0.66,0.64);
       vec3 col=mix(mix(base,tip,pow(vH,0.75)),scar,uScar); float rim=1.0-abs(vN.z);
       float a=uAlpha*(0.4+0.55*vH+0.35*rim); gl_FragColor=vec4(col*a,a); }`,
   transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
 const coneGeo=new THREE.ConeGeometry(1,1,7,1,true); coneGeo.translate(0,0.5,0);
-const glowMat=()=>new THREE.ShaderMaterial({ uniforms:{uAlpha:{value:0},uCol:{value:new THREE.Color(1.0,0.62,0.18)}},
+const glowMat=(c)=>new THREE.ShaderMaterial({ uniforms:{uAlpha:{value:0},uCol:{value:new THREE.Color(...c.glow)}},
   vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
   fragmentShader:`uniform float uAlpha; uniform vec3 uCol; varying vec2 vUv; void main(){ float d=distance(vUv,vec2(0.5))*2.0; float a=uAlpha*pow(max(0.0,1.0-d),2.2); gl_FragColor=vec4(uCol*a,a); }`,
   transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
 const ringGeo=new THREE.RingGeometry(0.88,1.0,48); ringGeo.rotateX(-Math.PI/2);
 const discGeo=new THREE.PlaneGeometry(2,2); discGeo.rotateX(-Math.PI/2);
 const KH=0.00053;
-const S=D.spikes.map(sp=>{ const g=hAt(sp.lon,sp.lat);
-  const cone=new THREE.Mesh(coneGeo, spikeMat()); cone.position.set(X(sp.lon),g,Z(sp.lat)); cone.renderOrder=6;
-  const glow=new THREE.Mesh(discGeo, glowMat()); glow.position.set(X(sp.lon),g+0.02,Z(sp.lat)); glow.renderOrder=5;
-  const ring=new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color:0xffc066,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending})); ring.position.set(X(sp.lon),g+0.03,Z(sp.lat)); ring.renderOrder=5;
+const S=D.spikes.map(sp=>{ const g=hAt(sp.lon,sp.lat), vc=VCOL[VKEY(sp.virus||"")];
+  const cone=new THREE.Mesh(coneGeo, spikeMat(vc)); cone.position.set(X(sp.lon),g,Z(sp.lat)); cone.renderOrder=6;
+  const glow=new THREE.Mesh(discGeo, glowMat(vc)); glow.position.set(X(sp.lon),g+0.02,Z(sp.lat)); glow.renderOrder=5;
+  const ring=new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color:vc.ring,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending})); ring.position.set(X(sp.lon),g+0.03,Z(sp.lat)); ring.renderOrder=5;
   scene.add(glow); scene.add(cone); scene.add(ring);
   let appear=sp.keys[0][0]; for(let i=0;i<sp.keys.length;i++){ if(sp.keys[i][1]>0){ appear=sp.keys[Math.max(0,i-1)][0]; break; } }
   return Object.assign({}, sp, {g, cone, glow, ring, appear}); });
@@ -309,7 +314,7 @@ const ML=D.march.map((m,i)=>[m,i]).filter(([m,i])=>m[4]).map(([m,i])=>{ const el
   return {el, i, v:new THREE.Vector3(X(m[1]), hCon(m[1],m[2])*0.92+0.4, Z(m[2]))}; });
 const coNodes={}, leadNodes={};
 function callout(id){ if(coNodes[id]) return coNodes[id]; const s=byId[id], el=document.createElement("div"); el.className="co right";
-  el.innerHTML=`<div class="n"></div><div class="v"></div><div class="x"></div>`; el.querySelector(".n").textContent=s.label; coEl.appendChild(el); coNodes[id]=el;
+  el.innerHTML=`<div class="n"></div><div class="v"></div><div class="x"></div>`; el.querySelector(".n").textContent=s.label; el.querySelector(".v").style.color=VCOL[VKEY(s.virus||"")].hex; coEl.appendChild(el); coNodes[id]=el;
   const g=document.createElementNS(NS,"g"); g.innerHTML=`<line stroke="#f4f0e6" stroke-width="1.2" stroke-dasharray="1.5 4.5" stroke-linecap="round" opacity=".95"/><circle r="3.6" fill="none" stroke="#f4f0e6" stroke-width="1.4"/><circle r="5" fill="none" stroke="#f4f0e6" stroke-width="1.5"/>`;
   lead.appendChild(g); leadNodes[id]=g; return el; }
 // locator

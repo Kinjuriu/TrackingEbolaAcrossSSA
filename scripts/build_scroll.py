@@ -16,8 +16,8 @@ def lerp_keys(keys, x):
 dayMap = [[16.8, 0], [17.6, 14], [18.6, 39], [19.6, 77], [20.5, 89], [21.4, 136], [22.2, 152], [22.6, 154], [26.2, 154], [27.4, 181], [40, 181]]
 def T_of_day(d): return lerp_keys([[b, a] for a, b in dayMap], d)
 
-drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[156,9552],[158,9704],[164,10141],[166,10274],[169,10351],[173,10741],[181,11197]]
-drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[156,4602],[158,4687],[164,4928],[166,4992],[169,5026],[173,5230],[181,5471]]
+drc_cases = [[0,0],[1,8],[14,225],[18,344],[23,550],[39,1138],[47,1460],[77,3532],[89,4665],[141,8544],[144,8728],[149,9066],[151,9144],[152,9277],[156,9552],[158,9704],[164,10141],[166,10274],[169,10351],[173,10741],[181,11197],[184,11376]]
+drc_deaths = [[47,452],[77,1556],[89,2184],[141,4114],[144,4205],[149,4381],[151,4410],[152,4478],[156,4602],[158,4687],[164,4928],[166,4992],[169,5026],[173,5230],[181,5471],[184,5568]]
 ituri_share = [[0,1.0],[89,0.853],[152,0.7337]]
 oct14 = {"ituri":6806,"nkivu":1991,"haut":398,"tshopo":64,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":0}
 oct26 = {"ituri":7247,"nkivu":2345,"haut":442,"tshopo":86,"basuele":13,"sudkivu":3,"sudubangi":2,"nordubangi":3}
@@ -182,8 +182,8 @@ def tags(*v): return "".join(f'<span class="tag {c}">{t}</span>' for c, t in v)
 TZ, TS, TB = ("z", "Zaire ebolavirus"), ("s", "Sudan virus"), ("b", "Bundibugyo virus")
 ARROW = '<svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true"><path d="M7 1v19M1.5 14.5 7 20l5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
 steps = [
- (0, "hero", "", "<h1>Ebola in Africa: 2014 to 2026</h1>",
-  "<p>This data tracks Ebola outbreaks across the African continent over a 12-year period, from the West African epidemic, which began in Guinea, to the cases in Nairobi in 2026; the disease itself was first recorded in 1976. The map visualizes outbreaks place by place. Active outbreaks are marked by rising spikes that correspond to confirmed cases of the Zaire, Sudan, and Bundibugyo viruses. Spikes turn grey when an outbreak is officially declared over.</p><p>" + tags(TZ, TS, TB) + '</p><div class="scrollcue">Scroll to begin' + ARROW + '</div>'),
+ (0, "hero", "", "<h1>Ebola in Africa: 2014 to 2026</h1><p class=\"toplinks\"><a href=\"https://claude.ai/artifact/CNkusNXufVLTZv3s3Q2zpp\" target=\"_blank\" rel=\"noopener\">Read the article</a><a href=\"./dashboard.html\">Open the dashboard</a></p>",
+  "<p>This data tracks Ebola outbreaks across the African continent over a 12-year period, from the West African epidemic, which began in Guinea, to the cases in Nairobi in 2026; the disease itself was first recorded in 1976. The map visualizes outbreaks place by place. Active outbreaks are marked by rising spikes that correspond to confirmed cases of the Zaire, Sudan, and Bundibugyo viruses. Spikes turn grey when an outbreak is officially declared over.</p><p>" + tags(TZ, TS, TB) + '</p>'),
  (2, "", "2014", "<h2>West Africa Epidemic</h2>",
   "<p>The largest Ebola epidemic on record reached Sierra Leone in 2014. Driven by the Zaire ebolavirus, the country recorded <b>14,124 cases</b> and <b>3,956 deaths</b>. This was the highest number of cases of any single country in the epidemic, although Liberia recorded more deaths.</p><p>" + tags(TZ) + "</p>"),
  (4, "", "2014 to 2016", "<h2>The Regional Toll</h2>",
@@ -210,8 +210,8 @@ steps = [
   "<p>On October 3, a Kenyan national flew from Entebbe, Uganda, to Nairobi. The patient&rsquo;s travel history included transit from Buta in Bas-Uélé through Kisangani and Beni in DR Congo, before crossing the Ugandan border at Mpondwe. The patient died on October 5.</p><p>By October 16, Kenyan health officials confirmed <b>three cases</b> of the Bundibugyo virus, all directly linked to this initial patient.</p><p>" + tags(TB) + "</p>"),
  (27.4, "", "October to November 2026", "<h2>Kenya&rsquo;s Cluster Grows, and Nigeria Reports a Case</h2>",
   "<p>Kenya&rsquo;s count rose to <b>nine confirmed cases</b>, all in one cluster linked to the first patient, including three health workers who treated him. On October 23, the Ministry of Health reported a <b>second death</b>, a 65-year-old woman who was a close relative of the first patient. WHO&rsquo;s report of the same day lists the same nine cases.</p>"
-  "<p>On October 20, Nigeria confirmed an imported case in Abuja, a woman who had travelled from Uganda; she was later evacuated to Switzerland for care.</p>"
-  "<p>In DR Congo, the outbreak passed <b>10,000 confirmed cases</b> in October, across eight provinces after Nord-Ubangi recorded its first cases. By November 12, ECDC counted <b>11,197 cases</b> and <b>5,471 deaths</b>. Kenya reported its last case on October 20, and seven of its nine patients have recovered.</p><p>" + tags(TB) + "</p>"),
+  "<p>On October 20, Nigeria confirmed an imported case in Abuja, a woman who had travelled from Uganda; she was later evacuated to Switzerland for care and was discharged on November 11.</p>"
+  "<p>In DR Congo, the outbreak passed <b>10,000 confirmed cases</b> in October, across eight provinces after Nord-Ubangi recorded its first cases. By November 15, ECDC counted <b>11,376 cases</b> and <b>5,568 deaths</b>. Kenya reported its last case on October 20, and seven of its nine patients have recovered.</p><p>" + tags(TB) + "</p>"),
  (29.6, "", "2014 to 2026", "<h2>Continental Overview</h2>",
   "<p>Viewing the continent as a whole shows a clear eastward progression of active outbreaks. While the West African and Ugandan epidemics are resolved, the eastern DR Congo outbreak remains active, with a direct transmission link to Nairobi.</p><p>A dotted line connects each outbreak geographically in chronological order, from Guéckédou in 2014 to Nairobi in 2026. Most map points represent separate zoonotic transmission events from animals to humans; however, the 2026 path to Nairobi represents a single, continuous chain of human infection.</p><p>At this map scale, spike heights are calculated using the square root of total cases.</p>"),
  (END, "", "Africa at night", "<h2>Infrastructure and Transmission</h2>",

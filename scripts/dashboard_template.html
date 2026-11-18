@@ -12,7 +12,7 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
 .nav a{color:#1a2230;text-decoration:underline;text-underline-offset:3px}
 </style>
 </head><body>
-<nav class="nav"><a href="./">The story</a><a href="./film.html">The film</a><a href="https://github.com/Kinjuriu/TrackingEbolaAcrossSSA">Code and data</a></nav>
+<nav class="nav"><a href="./">The storyboard</a><a href="https://claude.ai/artifact/CNkusNXufVLTZv3s3Q2zpp" target="_blank" rel="noopener">Read the article</a><a href="./film.html">The film</a><a href="https://github.com/Kinjuriu/TrackingEbolaAcrossSSA">Code and data</a></nav>
 <div id="dash-root">
 <script>
 (function(){
@@ -34,7 +34,7 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
 </script>
 <style>
 .sg{--ink:#1a2230;--muted:#4b5767;--faint:#5c6878;--line:#d9dfe6;--line2:#eceff3;--soft:#f5f7f9;
-  --zaire:#009e73;--sudan:#2a86c8;--bundi:#d55e00;--dot:#c9d1da;--dothot:#7c8a9a;
+  --zaire:#9a6a12;--sudan:#2a6fb8;--bundi:#c0392b;--dot:#c9d1da;--dothot:#7c8a9a;
   --text:"Fira Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:light;background:#fff;color:var(--ink);font-family:var(--text);font-size:14px;line-height:1.5;max-width:1320px;margin-inline:auto}
 .sg *{box-sizing:border-box}
@@ -56,6 +56,15 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
 .sw{width:10px;height:10px;display:inline-block;flex:none}
 .sw.Zaire{background:var(--zaire)} .sw.Sudan{background:var(--sudan)} .sw.Bundibugyo{background:var(--bundi)}
 .sg-seg button[aria-pressed=true] .sw{outline:1px solid #fff}
+#virus button[aria-pressed=true] .sw{background:#fff}
+#virus button[data-v=Zaire][aria-pressed=true]{background:var(--zaire);border-color:var(--zaire)}
+#virus button[data-v=Sudan][aria-pressed=true]{background:var(--sudan);border-color:var(--sudan)}
+#virus button[data-v=Bundibugyo][aria-pressed=true]{background:var(--bundi);border-color:var(--bundi)}
+.sg[data-virus=Zaire] .sg-filters{background:#f8f0e1}
+.sg[data-virus=Sudan] .sg-filters{background:#eaf1fa}
+.sg[data-virus=Bundibugyo] .sg-filters{background:#fbeae7}
+.sg-filters{transition:background-color .2s}
+@media (prefers-reduced-motion:reduce){.sg-filters{transition:none}}
 .sg-sel{font:inherit;font-size:13.5px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:0;padding:5px 8px;cursor:pointer}
 .sg-fact{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
 .sg-clear{font:inherit;font-size:13.5px;color:var(--ink);background:none;border:0;padding:5px 0;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -74,6 +83,8 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
 .sg-kv{display:grid;grid-template-columns:42% 58%;gap:6px 10px;font-size:13.5px;margin:12px 0 0}
 .sg-kv dt{color:var(--muted)}
 .sg-kv dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+.sg-byv td.n,.sg-byv th.n{text-align:right;font-variant-numeric:tabular-nums}
+.sg-byv td b{font-weight:600}
 .sg-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px}
 @media (max-width:560px){.sg-kpis{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}.sg-kpis .sg-kpi:nth-child(3){border-left:0;padding-left:0}}
 .sg-kpi{padding:4px 16px 4px 0}
@@ -128,9 +139,9 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
 <div class="sg" id="sg">
   <main class="sg-main">
     <header id="overview">
-      <h1 class="sg-h1">Ebola Outbreaks</h1>
-      <p class="sg-lede">Every Ebola outbreak in sub-Saharan Africa since 2014. The 2026 Bundibugyo outbreak has <b id="lede-drc">11,197</b> confirmed cases in DR Congo, the second largest on record, Kenya has confirmed <b id="lede-ken">9</b> cases and 2 deaths, and Nigeria has one imported case.</p>
-      <p class="sg-note">Data will be updated as the WHO shares new situation reports. Latest: ECDC, 12 November 2026, for DR Congo and Kenya; provinces to 26 October. 2026 figures are confirmed cases and are provisional.</p>
+      <h1 class="sg-h1">DR Congo&rsquo;s 2026 Ebola outbreak is the largest since West Africa&rsquo;s</h1>
+      <p class="sg-lede">Every Ebola outbreak in sub-Saharan Africa since 2014. The 2026 Bundibugyo outbreak has <b id="lede-drc">11,376</b> confirmed cases in DR Congo, the second largest on record, Kenya has confirmed <b id="lede-ken">9</b> cases and 2 deaths, and Nigeria has one imported case.</p>
+      <p class="sg-note">Data will be updated as the WHO shares new situation reports. Latest: ECDC, 16 November 2026 (data to 15 November), for DR Congo and Kenya; provinces to 26 October. 2026 figures are confirmed cases and are provisional.</p>
     </header>
 
     <section class="sg-filters" id="explore" aria-label="Filters">
@@ -162,13 +173,9 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
         </dl>
       </section>
       <section class="sg-sec" aria-label="Summary">
-        <h2 class="sg-ct">Summary</h2><p class="sg-cs" id="k-scope">All outbreaks since 2014</p>
-        <div class="sg-kpis">
-          <div class="sg-kpi"><div class="sg-kh">Reported cases</div><div class="sg-kv2" id="k-cases">—</div><div class="sg-kd" id="k-cases-s"></div></div>
-          <div class="sg-kpi"><div class="sg-kh">Deaths</div><div class="sg-kv2" id="k-deaths">—</div><div class="sg-kd" id="k-deaths-s"></div></div>
-          <div class="sg-kpi"><div class="sg-kh">Case fatality</div><div class="sg-kv2" id="k-cfr">—</div><div class="sg-kd">deaths per confirmed case</div></div>
-          <div class="sg-kpi"><div class="sg-kh">Outbreak locations</div><div class="sg-kv2" id="k-locs">—</div><div class="sg-kd" id="k-locs-s"></div></div>
-        </div>
+        <h2 class="sg-ct">How deadly each virus has been</h2><p class="sg-cs" id="k-scope">Outbreaks since 2014, by virus</p>
+        <div class="sg-tw" style="margin-top:10px"><table class="sg-table sg-byv"><thead><tr><th>Virus</th><th class="n sg-hide-n">Locations</th><th class="n">Cases</th><th class="n">Deaths</th><th class="n">Died</th></tr></thead><tbody id="t-byvirus"></tbody></table></div>
+        <p class="sg-fn" id="k-note">Shares differ by virus, so one figure for all outbreaks would mislead. Earlier totals include probable cases; 2026 counts are confirmed cases only, and DR Congo&rsquo;s province totals run to 26 October.</p>
       </section>
     </div>
 
@@ -189,6 +196,11 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
           <h2 class="sg-ct">2026 outbreak over time</h2><p class="sg-cs">DR Congo, cumulative confirmed cases and deaths</p>
           <div class="sg-chart" id="c-growth"></div>
           <p class="sg-fn">Markers are reported figures; lines join them. Source: DR Congo Ministry of Health, WHO, ECDC, US CDC.</p>
+        </section>
+        <section class="sg-sec" id="daily">
+          <h2 class="sg-ct">New cases have held level since July</h2><p class="sg-cs" id="c-daily-s">DR Congo, average new confirmed cases per day between reports</p>
+          <div class="sg-chart" id="c-daily"></div>
+          <p class="sg-fn">Each bar spans the days between two reports; its height is the new confirmed cases in that span divided by its days. Only WHO, ECDC and US CDC reports are used, and reports fewer than five days apart are merged, so that late or batched reporting does not show as a spike.</p>
         </section>
         <section class="sg-sec" id="travel">
           <h2 class="sg-ct">Travel restrictions</h2><p class="sg-cs">Entry bans and visa suspensions countries have announced over the 2026 outbreak</p>
@@ -225,7 +237,7 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
       </table></div>
     </section>
 
-    <p class="sg-foot" id="sources">Sources: ECDC (DR Congo provinces, data to 26 Oct 2026); WHO Disease Outbreak News and WHO Africa situation reports; Kenya Ministry of Health; US CDC outbreak history; WHO end-of-outbreak statements; UKHSA. Virus colours match the virus key in the story. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. Uganda&rsquo;s 2026 chain was declared over in August; one linked case in France is not shown. Flags: flag-icons (MIT licence).</p>
+    <p class="sg-foot" id="sources">Sources: ECDC (DR Congo provinces, data to 26 Oct 2026); WHO Disease Outbreak News and WHO Africa situation reports; Kenya Ministry of Health; US CDC outbreak history; WHO end-of-outbreak statements; UKHSA. Virus colours match the virus key in the storyboard. Earlier outbreaks show final totals, which for 2014&ndash;16, 2018&ndash;20 and 2022 include probable cases. Uganda&rsquo;s 2026 chain was declared over in August; one linked case in France is not shown. Flags: flag-icons (MIT licence).</p>
     <div class="sg-tip" id="tip" hidden></div>
   </main>
 </div>
@@ -234,7 +246,7 @@ body{padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset
 <script>
 window.fmt = d3.format(','); window.pct = d3.format('.1%');
 window.toN = (v) => (v === null || v === undefined || v === '') ? null : Number(v);
-const VC = { Zaire: '#009e73', Sudan: '#2a86c8', Bundibugyo: '#d55e00' };
+const VC = { Zaire: '#9a6a12', Sudan: '#2a6fb8', Bundibugyo: '#c0392b' };
 dash.calc('cfr', { inputs: ['outbreaks'], fn: (outbreaks) => outbreaks.map((r) => ({ id: r.id, cfr: Number(r.cases) ? Number(r.deaths) / Number(r.cases) : null })) });
 window.sgState = { sort: 'cases', dir: -1 };
 window.sgTip = (lines, x, y) => {
@@ -271,6 +283,7 @@ dash.onData(() => {
   const rows = o.status === 'ok' ? o.data : [];
   selC.replaceChildren(new Option('All countries', ''), ...[...new Set(rows.map((r) => r.country))].sort().map((v) => new Option(v, v))); selC.value = p.country ?? '';
   if (q !== document.activeElement) q.value = p.q ?? '';
+  document.getElementById('sg').dataset.virus = p.virus || '';
   const n = sgFilter(rows, p).length; document.getElementById('count').textContent = n + (n === 1 ? ' outbreak location' : ' outbreak locations');
 });
 </script>
@@ -296,13 +309,13 @@ dash.onData(() => {
   const r26 = o.data.filter((r) => Number(r.year) === 2026);
   set('t-prov', String(r26.filter((r) => r.country === 'DR Congo').length));
   set('t-ctry', [...new Set(r26.map((r) => r.country))].join(', '));
-  const all = o.data, sel = sgFilter(all, dash.params()), sum = (rs, k) => d3.sum(rs, (r) => Number(r[k]));
-  const C = sum(sel, 'cases'), Dd = sum(sel, 'deaths'), CA = sum(all, 'cases'), DA = sum(all, 'deaths'), f = !sgFiltered();
-  set('k-scope', f ? 'For the outbreaks in your selection' : 'All outbreaks since 2014');
-  set('k-cases', fmt(C)); set('k-cases-s', f ? pct(CA ? C / CA : 0) + ' of all ' + fmt(CA) : 'since 2014');
-  set('k-deaths', fmt(Dd)); set('k-deaths-s', f ? pct(DA ? Dd / DA : 0) + ' of all ' + fmt(DA) : 'since 2014');
-  set('k-cfr', C ? pct(Dd / C) : '—');
-  const ctry = new Set(sel.map((r) => r.country)); set('k-locs', fmt(sel.length)); set('k-locs-s', 'in ' + ctry.size + (ctry.size === 1 ? ' country' : ' countries'));
+  const sel = sgFilter(o.data, dash.params()), sum = (rs, k) => d3.sum(rs, (r) => Number(r[k]) || 0);
+  set('k-scope', sgFiltered() ? 'Outbreaks since 2014, by virus' : 'Outbreaks in your selection, by virus');
+  const tb = document.getElementById('t-byvirus');
+  tb.innerHTML = ['Zaire', 'Sudan', 'Bundibugyo'].map((v) => { const rs = sel.filter((r) => r.virus === v); if (!rs.length) return '';
+    const c = sum(rs, 'cases'), dd = sum(rs, 'deaths');
+    return `<tr><td><span class="sg-vir"><i class="sw ${v}"></i>${v}</span></td><td class="n sg-hide-n">${fmt(rs.length)}</td><td class="n">${fmt(c)}</td><td class="n">${fmt(dd)}</td><td class="n"><b>${c ? d3.format('.0%')(dd / c) : '\u2014'}</b></td></tr>`; }).join('')
+    || '<tr><td colspan="5">No outbreaks match these filters.</td></tr>';
 });
 </script>
 
@@ -323,9 +336,34 @@ dash.onData(() => {
   svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (r) => x(r.day)).attr('cy', (r) => y(r.cases)).attr('r', 3.2).attr('fill', '#fff').attr('stroke', VC.Bundibugyo).attr('stroke-width', 1.6)
     .on('mousemove', (e, r) => sgTip([d3.utcFormat('%b %-d, %Y')(r.day), fmt(r.cases) + ' cases', r.deaths !== null ? fmt(r.deaths) + ' deaths' : 'deaths not reported', r.source], e.clientX, e.clientY)).on('mouseleave', () => sgTip(null));
   const lc = rows[rows.length - 1], ld = dr[dr.length - 1];
-  svg.append('text').attr('x', x(lc.day) + 8).attr('y', y(lc.cases)).attr('dy', '0.32em').attr('font-size', 13).attr('font-weight', 600).attr('fill', '#a34500').text(fmt(lc.cases) + ' cases');
+  svg.append('text').attr('x', x(lc.day) + 8).attr('y', y(lc.cases)).attr('dy', '0.32em').attr('font-size', 13).attr('font-weight', 600).attr('fill', '#9a2d22').text(fmt(lc.cases) + ' cases');
   svg.append('text').attr('x', x(ld.day) + 8).attr('y', y(ld.deaths)).attr('dy', '0.32em').attr('font-size', 13).attr('font-weight', 600).attr('fill', '#1a2230').text(fmt(ld.deaths) + ' deaths');
   svg.append('g').selectAll('text').data(x.ticks(W < 480 ? 3 : 6)).join('text').attr('x', (d) => x(d)).attr('y', H - 4).attr('text-anchor', 'middle').attr('fill', '#5c6878').attr('font-size', 12).text((d) => d3.utcFormat('%b')(d));
+});
+</script>
+
+<script>
+// 2026 daily new confirmed cases, averaged over the days between reports (reports under five days apart merged)
+dash.onData(() => {
+  const box = document.getElementById('c-daily'), t = dash.data('timeline_2026'); box.replaceChildren(); if (t.status !== 'ok') return;
+  const pts = t.data.filter((r) => /WHO|ECDC|CDC/.test(r.source)).map((r) => ({ day: new Date(r.day + 'T00:00:00Z'), cases: Number(r.cases) })).sort((a, b) => a.day - b.day);
+  const DAY = 864e5, kept = [pts[0]];
+  pts.slice(1).forEach((p, i, a) => { const isLast = i === a.length - 1; if ((p.day - kept[kept.length - 1].day) / DAY >= 5 || isLast) kept.push(p); });
+  const bars = kept.slice(1).map((r, i) => { const p = kept[i], days = (r.day - p.day) / DAY; return { from: p.day, to: r.day, days, n: r.cases - p.cases, rate: (r.cases - p.cases) / days }; });
+  const W = box.clientWidth || 600, H = 210, ml = 34, svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img').attr('aria-label', 'Bar chart of average new confirmed cases per day in DR Congo between reports');
+  const x = d3.scaleUtc([kept[0].day, kept[kept.length - 1].day], [ml, W - 6]), y = d3.scaleLinear([0, d3.max(bars, (b) => b.rate) * 1.15], [H - 22, 14]).nice();
+  svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', ml).attr('x2', W - 6).attr('y1', (d) => y(d)).attr('y2', (d) => y(d)).attr('stroke', '#d9dfe6').attr('stroke-width', (d) => d === 0 ? 1 : 0.6);
+  svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', 0).attr('y', (d) => y(d)).attr('dy', '0.32em').attr('fill', '#5c6878').attr('font-size', 12).text((d) => d);
+  const last = bars[bars.length - 1];
+  svg.append('g').selectAll('rect').data(bars).join('rect').attr('x', (b) => x(b.from) + 1).attr('width', (b) => Math.max(2, x(b.to) - x(b.from) - 2))
+    .attr('y', (b) => y(b.rate)).attr('height', (b) => y(0) - y(b.rate)).attr('fill', VC.Bundibugyo).attr('fill-opacity', (b) => b === last ? 1 : 0.55)
+    .on('mousemove', (e, b) => sgTip([d3.utcFormat('%-d %b')(b.from) + ' to ' + d3.utcFormat('%-d %b %Y')(b.to), Math.round(b.rate) + ' new confirmed cases a day', fmt(b.n) + ' cases over ' + b.days + ' days'], e.clientX, e.clientY)).on('mouseleave', () => sgTip(null));
+  svg.append('g').selectAll('text').data(bars.filter((b) => x(b.to) - x(b.from) >= 22)).join('text').attr('x', (b) => (x(b.from) + x(b.to)) / 2).attr('y', (b) => y(b.rate) - 5)
+    .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#1a2230').text((b) => Math.round(b.rate));
+  svg.append('g').selectAll('text').data(x.ticks(W < 480 ? 3 : 6)).join('text').attr('x', (d) => x(d)).attr('y', H - 4).attr('text-anchor', 'middle').attr('fill', '#5c6878').attr('font-size', 12).text((d) => d3.utcFormat('%b')(d));
+  const since = bars.filter((b) => b.from >= new Date('2026-07-01T00:00:00Z'));
+  if (since.length) document.getElementById('c-daily-s').textContent = `DR Congo, average new confirmed cases per day between reports: ${Math.round(d3.min(since, (b) => b.rate))} to ${Math.round(d3.max(since, (b) => b.rate))} a day since July; latest ${Math.round(last.rate)} a day`;
 });
 </script>
 

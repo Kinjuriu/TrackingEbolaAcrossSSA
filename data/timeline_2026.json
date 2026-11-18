@@ -118,5 +118,11 @@
   "cases": 11197,
   "deaths": 5471,
   "source": "ECDC, 12 Nov (data to 11 Nov)"
+ },
+ {
+  "day": "2026-11-15",
+  "cases": 11376,
+  "deaths": 5568,
+  "source": "ECDC, 15 Nov (data to 14 Nov)"
  }
 ]
