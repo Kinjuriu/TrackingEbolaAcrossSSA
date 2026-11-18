@@ -182,7 +182,7 @@ def tags(*v): return "".join(f'<span class="tag {c}">{t}</span>' for c, t in v)
 TZ, TS, TB = ("z", "Zaire ebolavirus"), ("s", "Sudan virus"), ("b", "Bundibugyo virus")
 ARROW = '<svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true"><path d="M7 1v19M1.5 14.5 7 20l5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
 steps = [
- (0, "hero", "", "<h1>Ebola in Africa: 2014 to 2026</h1><p class=\"toplinks\"><a href=\"https://claude.ai/artifact/CNkusNXufVLTZv3s3Q2zpp\" target=\"_blank\" rel=\"noopener\">Read the article</a><a href=\"./dashboard.html\">Open the dashboard</a></p>",
+ (0, "hero", "", "<h1>Ebola in Africa: 2014 to 2026</h1>",
   "<p>This data tracks Ebola outbreaks across the African continent over a 12-year period, from the West African epidemic, which began in Guinea, to the cases in Nairobi in 2026; the disease itself was first recorded in 1976. The map visualizes outbreaks place by place. Active outbreaks are marked by rising spikes that correspond to confirmed cases of the Zaire, Sudan, and Bundibugyo viruses. Spikes turn grey when an outbreak is officially declared over.</p><p>" + tags(TZ, TS, TB) + '</p>'),
  (2, "", "2014", "<h2>West Africa Epidemic</h2>",
   "<p>The largest Ebola epidemic on record reached Sierra Leone in 2014. Driven by the Zaire ebolavirus, the country recorded <b>14,124 cases</b> and <b>3,956 deaths</b>. This was the highest number of cases of any single country in the epidemic, although Liberia recorded more deaths.</p><p>" + tags(TZ) + "</p>"),
